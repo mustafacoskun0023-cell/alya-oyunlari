@@ -1,5 +1,5 @@
 /* Alya'nın Oyunları — Service Worker (tam offline) */
-const CACHE = 'alya-v1.0.0';
+const CACHE = 'alya-v2.0.0';
 const ASSETS = [
   './',
   './index.html',
@@ -11,6 +11,8 @@ const ASSETS = [
   './fx.js',
   './game-numbers.js',
   './game-shapes.js',
+  './game-letters.js',
+  './game-memory.js',
   './app.js',
   './icon-192.png',
   './icon-512.png',

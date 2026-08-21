@@ -23,27 +23,73 @@ window.Snd = (function () {
     speechSynthesis.onvoiceschanged = pickVoice;
   }
 
-  let speakQueue = [];
+  /* ---------- Kayıtlı ses klipleri (varsa) + Web Speech yedeği ---------- */
+  const CLIP_DIR = 'sesler/';
+  const missing = new Set();     // 404 alınan id'ler — bir daha denenmez
+  const preloaded = new Map();   // id -> HTMLAudioElement
+  let curAudio = null;
+  let timers = [];
+
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function stopVoice() {
+    clearTimers();
+    try { speechSynthesis.cancel(); } catch (e) {}
+    if (curAudio) { try { curAudio.pause(); } catch (e) {} curAudio = null; }
+  }
+
   function speak(text, opts) {
     opts = opts || {};
     if (!('speechSynthesis' in window) || !text) return;
     try {
-      if (!opts.queue) { speechSynthesis.cancel(); speakQueue = []; }
+      if (!opts.keep) speechSynthesis.cancel();
       if (!voicesReady) pickVoice();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = opts.lang || 'tr-TR';
       if (trVoice && u.lang === 'tr-TR') u.voice = trVoice;
-      u.rate = opts.rate != null ? opts.rate : 0.86;
-      u.pitch = opts.pitch != null ? opts.pitch : 1.25;
+      u.rate = opts.rate != null ? opts.rate : 0.92;
+      u.pitch = opts.pitch != null ? opts.pitch : 1.05;
       u.volume = 1;
-      if (opts.delay) {
-        setTimeout(() => { try { speechSynthesis.speak(u); } catch (e) {} }, opts.delay);
-      } else {
-        speechSynthesis.speak(u);
-      }
+      speechSynthesis.speak(u);
     } catch (e) {}
   }
-  function stopSpeak() { try { speechSynthesis.cancel(); } catch (e) {} }
+
+  /* spec: "düz metin"  |  { id: 'ovgu-1', text: 'Aferin Alya!' }
+     Önce sesler/<id>.mp3 aranır; yoksa cihazın konuşma motoruna düşer. */
+  function say(spec, opts) {
+    opts = opts || {};
+    if (!spec) return;
+    if (opts.delay) {
+      timers.push(setTimeout(() => say(spec, Object.assign({}, opts, { delay: 0 })), opts.delay));
+      return;
+    }
+    if (!opts.keep) stopVoice();
+
+    const id = typeof spec === 'object' ? spec.id : null;
+    const text = typeof spec === 'object' ? spec.text : spec;
+
+    if (!id || missing.has(id)) { speak(text, opts); return; }
+
+    let a = preloaded.get(id);
+    if (!a) { a = new Audio(CLIP_DIR + id + '.mp3'); a.preload = 'auto'; }
+    a.currentTime = 0;
+    curAudio = a;
+    const fallback = () => { if (!missing.has(id)) { missing.add(id); speak(text, opts); } };
+    a.onerror = fallback;
+    const pr = a.play();
+    if (pr && pr.catch) pr.catch(fallback);
+  }
+
+  /* Bir sonraki soruların kliplerini sessizce indir */
+  function preload(ids) {
+    (ids || []).forEach(id => {
+      if (!id || missing.has(id) || preloaded.has(id)) return;
+      const a = new Audio(CLIP_DIR + id + '.mp3');
+      a.preload = 'auto';
+      a.onerror = () => { missing.add(id); preloaded.delete(id); };
+      preloaded.set(id, a);
+    });
+  }
 
   /* ---------- Web Audio kurulumu ---------- */
   function ensure() {
@@ -190,7 +236,8 @@ window.Snd = (function () {
   }
 
   return {
-    unlock, speak, stopSpeak, sfx: SFX,
+    unlock, say, speak, preload,
+    stopSpeak: stopVoice, stopVoice, sfx: SFX,
     musicStart, musicStop, musicToggle, duck,
     get musicOn() { return musicOn; }
   };

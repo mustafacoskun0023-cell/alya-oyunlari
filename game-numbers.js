@@ -2,11 +2,20 @@
 window.GameNumbers = (function () {
   const WORDS = ['', 'bir', 'iki', 'üç', 'dört', 'beş', 'altı', 'yedi', 'sekiz', 'dokuz', 'on'];
   const OBJECTS = [
-    { e: '🍎', n: 'elma' }, { e: '🍌', n: 'muz' }, { e: '🍓', n: 'çilek' },
-    { e: '⭐', n: 'yıldız' }, { e: '🐟', n: 'balık' }, { e: '🎈', n: 'balon' },
-    { e: '🐞', n: 'uğur böceği' }, { e: '🌸', n: 'çiçek' }, { e: '🍪', n: 'kurabiye' },
-    { e: '🐥', n: 'civciv' }, { e: '🦋', n: 'kelebek' }, { e: '🚗', n: 'araba' }
+    { e: '🍎', kod: 'elma',       cogul: 'Elmalar!' },
+    { e: '🍌', kod: 'muz',        cogul: 'Muzlar!' },
+    { e: '🍓', kod: 'cilek',      cogul: 'Çilekler!' },
+    { e: '⭐', kod: 'yildiz',     cogul: 'Yıldızlar!' },
+    { e: '🐟', kod: 'balik',      cogul: 'Balıklar!' },
+    { e: '🎈', kod: 'balon',      cogul: 'Balonlar!' },
+    { e: '🐞', kod: 'ugurbocegi', cogul: 'Uğur böcekleri!' },
+    { e: '🌸', kod: 'cicek',      cogul: 'Çiçekler!' },
+    { e: '🍪', kod: 'kurabiye',   cogul: 'Kurabiyeler!' },
+    { e: '🐥', kod: 'civciv',     cogul: 'Civcivler!' },
+    { e: '🦋', kod: 'kelebek',    cogul: 'Kelebekler!' },
+    { e: '🚗', kod: 'araba',      cogul: 'Arabalar!' }
   ];
+  const BW = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Sekiz', 'Dokuz', 'On'];
   const NUM_COLORS = ['#FF4757', '#2E86FF', '#22C55E', '#FF8A00', '#8B5CF6', '#12C2C2', '#FF5FA2'];
 
   let order = [];
@@ -51,10 +60,11 @@ window.GameNumbers = (function () {
             <div class="big-number" style="color:${color}">${n}</div>
             <div class="number-word" style="color:${color}">${upper(WORDS[n])}</div>
           </div>
-          <div class="prompt-q">Hangisinde ${WORDS[n]} tane ${obj.n} var?</div>
+          <div class="prompt-q">Hangisinde ${WORDS[n]} tane var?</div>
         </div>`,
-      say: `${WORDS[n]}!`,
-      sayFollow: { text: `Hangisinde ${WORDS[n]} tane ${obj.n} var?`, delay: 900 },
+      say: { id: 'nesne-' + obj.kod, text: obj.cogul },
+      sayFollow: { id: 'soru-' + n,
+                   text: `${BW[n]}! Hangisinde ${WORDS[n]} tane var?`, delay: 950 },
       options: opts,
       cols: 3
     };
@@ -62,7 +72,7 @@ window.GameNumbers = (function () {
 
   return {
     id: 'numbers', title: 'Sayıları<br>Öğren', emoji: '🔢',
-    intro: 'Hadi sayıları öğrenelim!',
+    intro: { id: 'sys-oyun-sayi', text: 'Hadi sayıları öğrenelim!' },
     total: 10, start, question
   };
 })();

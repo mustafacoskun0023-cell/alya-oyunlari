@@ -49,7 +49,7 @@ window.GameShapes = (function () {
     const type = plan[i % plan.length];
     const tColor = U.pick(COLORS);
     const tShape = U.pick(SHAPES);
-    let opts = [], say, promptLabel;
+    let opts = [], say, promptLabel, sesId;
 
     if (type === 'color') {
       // Aynı şekil, farklı renkler → rengi bul
@@ -59,7 +59,7 @@ window.GameShapes = (function () {
         { c: others[0], s: tShape, correct: false },
         { c: others[1], s: tShape, correct: false }
       ]);
-      say = `${tColor.n} olanı bul!`;
+      say = `${tColor.n} olanı bul!`; sesId = 'renk-' + tColor.id;
       promptLabel = upper(tColor.n);
     } else if (type === 'shape') {
       // Aynı renk, farklı şekiller → şekli bul
@@ -69,7 +69,7 @@ window.GameShapes = (function () {
         { c: tColor, s: others[0], correct: false },
         { c: tColor, s: others[1], correct: false }
       ]);
-      say = `${tShape.acc} bul!`;
+      say = `${tShape.acc} bul!`; sesId = 'sekil-' + tShape.id;
       promptLabel = upper(tShape.n);
     } else {
       // Hem renk hem şekil
@@ -80,7 +80,7 @@ window.GameShapes = (function () {
         { c: oc, s: tShape, correct: false },   // doğru şekil, yanlış renk
         { c: tColor, s: os, correct: false }    // doğru renk, yanlış şekil
       ]);
-      say = `${tColor.n} ${tShape.acc} bul!`;
+      say = `${tColor.n} ${tShape.acc} bul!`; sesId = `rs-${tColor.id}-${tShape.id}`;
       promptLabel = upper(tColor.n + ' ' + tShape.n);
     }
 
@@ -93,7 +93,7 @@ window.GameShapes = (function () {
           </div>
           <div class="prompt-q">${cap(say)}</div>
         </div>`,
-      say: say,
+      say: { id: sesId, text: say },
       options: opts.map(o => ({ html: shapeSVG(o.s, o.c), correct: o.correct })),
       cols: 3
     };
@@ -101,7 +101,7 @@ window.GameShapes = (function () {
 
   return {
     id: 'shapes', title: 'Renkler ve<br>Şekiller', emoji: '🎨',
-    intro: 'Renkleri ve şekilleri bulalım!',
+    intro: { id: 'sys-oyun-renk', text: 'Renkleri ve şekilleri bulalım!' },
     total: 10, start, question
   };
 })();

@@ -228,7 +228,7 @@ body::before{
 @media (orientation:portrait){
   .menu-grid{grid-template-columns:repeat(2,1fr)}
   /* dikeyde seçenekler alt alta: kartlar geniş olur, nesneler büyük görünür */
-  .options-area{grid-template-columns:1fr !important}
+  .options-area:not(.memory-grid){grid-template-columns:1fr !important}
   :root{--tap:clamp(92px,13vh,150px)}
   .big-number{font-size:clamp(46px,9vh,96px)}
   .prompt-bubble{min-height:clamp(72px,11vh,130px);padding:8px 18px}
@@ -262,3 +262,73 @@ body::before{
   z-index:5;
 }
 .install-fab:active{transform:translateX(-50%) translateY(4px)}
+
+/* ===== Harf oyunu ===== */
+.big-letter{
+  font-size:clamp(56px,16vh,160px);line-height:.95;letter-spacing:-1px;
+  padding:0 clamp(4px,1vw,16px);
+}
+.opt-letter{
+  font-size:min(60cqh,50cqw,26vh);line-height:1;color:var(--ink);font-weight:800;
+}
+.opt-pic{
+  font-size:min(52cqh,46cqw,20vh);line-height:1;
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.2));
+}
+.opt .opt-pic + .opt-cap{
+  position:absolute;bottom:clamp(6px,1.6vh,16px);left:0;right:0;text-align:center;
+  font-size:clamp(12px,2.4vh,22px);color:#6B5AA6;
+}
+.opt:has(.opt-cap){flex-direction:column;justify-content:center;padding-bottom:clamp(26px,5vh,52px)}
+/* container-query desteklemeyen tarayıcı yedeği */
+@supports not (container-type:size){
+  .opt-letter{font-size:clamp(40px,12vh,110px)}
+  .opt-pic{font-size:clamp(34px,10vh,92px)}
+}
+
+/* ===== Hafıza oyunu ===== */
+.prompt-q.big{font-size:clamp(18px,3.6vh,34px)}
+.level-dots{display:flex;gap:10px;margin-top:8px;justify-content:center}
+.level-dots .dot{
+  width:clamp(10px,1.8vh,16px);aspect-ratio:1;border-radius:50%;
+  background:rgba(255,255,255,.45);box-shadow:inset 0 2px 4px rgba(0,0,0,.15);
+}
+.level-dots .dot.done{background:#FFC800}
+.level-dots .dot.now{background:#fff;transform:scale(1.25)}
+
+.memory-grid{gap:clamp(6px,1.4vw,16px)}
+.card{
+  position:relative;border-radius:22px;min-height:0;
+  background:transparent;perspective:800px;transition:transform .15s;
+}
+.card:active{transform:scale(.95)}
+.card-face{
+  position:absolute;inset:0;display:grid;place-items:center;
+  border-radius:22px;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  transition:transform .35s cubic-bezier(.3,.9,.4,1.2);
+  box-shadow:0 8px 0 rgba(0,0,0,.13),0 12px 22px rgba(43,27,84,.2);
+}
+.card-face.back{
+  background:linear-gradient(160deg,#FFD84D,#FF8A00);
+  font-size:min(46cqh,46cqw,15vh);color:#5A3B00;transform:rotateY(0deg);
+  border:5px solid rgba(255,255,255,.75);
+}
+.card-face.front{
+  background:#fff;font-size:min(52cqh,52cqw,13vh);transform:rotateY(180deg);
+}
+.card{container-type:size}
+.card.open .card-face.back{transform:rotateY(-180deg)}
+.card.open .card-face.front{transform:rotateY(0deg)}
+.card.matched .card-face.front{background:#DCFCE7;box-shadow:0 0 0 6px #22C55E,0 8px 0 rgba(0,0,0,.13)}
+.card.matched{animation:popCorrect .5s ease}
+.card.shake{animation:shake .45s ease}
+@supports not (container-type:size){
+  .card-face.back{font-size:clamp(30px,8vh,72px)}
+  .card-face.front{font-size:clamp(34px,9vh,84px)}
+}
+@media (orientation:portrait){
+  .opt:has(.opt-cap){padding-bottom:clamp(22px,4vh,40px)}
+  /* maskot sol üstte duruyor — başlık onun altında kalmasın */
+  .prompt-area{padding:0 clamp(46px,9vh,78px)}
+  .prompt-q.big{font-size:clamp(16px,3vh,28px)}
+}
