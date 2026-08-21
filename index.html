@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+<title>Alya'nın Oyunları</title>
+<meta name="description" content="Alya için eğitici mini oyunlar">
+<meta name="theme-color" content="#4A2FBD">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alya">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- ============ AÇILIŞ / SES KİLİDİ ============ -->
+<div id="splash" class="screen active splash">
+  <div class="splash-inner">
+    <div class="splash-cat" id="splashCat"></div>
+    <h1 class="splash-title">Alya'nın Oyunları</h1>
+    <button id="startBtn" class="big-start" aria-label="Başla">
+      <span class="play-tri"></span>
+      <span>BAŞLA</span>
+    </button>
+    <p class="splash-hint">Sesi açmak için dokun</p>
+  </div>
+</div>
+
+<!-- ============ ANA MENÜ ============ -->
+<div id="menu" class="screen">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-cat" id="menuCat"></div>
+      <div class="brand-text">
+        <span class="brand-title">Alya'nın Oyunları</span>
+        <span class="brand-stars" id="totalStars">⭐ 0</span>
+      </div>
+    </div>
+    <button id="musicBtn" class="icon-btn" aria-label="Müzik aç kapat" aria-pressed="false">
+      <span class="icon-note">♪</span>
+      <span class="icon-slash"></span>
+    </button>
+  </header>
+
+  <main class="menu-grid" id="menuGrid"></main>
+</div>
+
+<!-- ============ OYUN EKRANI ============ -->
+<div id="game" class="screen game">
+  <header class="game-top">
+    <button id="backBtn" class="icon-btn back" aria-label="Ana menüye dön">‹</button>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">1 / 10</div>
+    </div>
+    <button id="repeatBtn" class="icon-btn" aria-label="Tekrar dinle">🔊</button>
+  </header>
+
+  <section class="prompt-area" id="promptArea"></section>
+  <section class="options-area" id="optionsArea"></section>
+
+  <div class="mascot-corner" id="gameCat"></div>
+</div>
+
+<!-- ============ TUR SONU ============ -->
+<div id="reward" class="screen reward">
+  <div class="reward-card">
+    <div class="reward-cat" id="rewardCat"></div>
+    <h2 id="rewardTitle">Tebrikler Alya!</h2>
+    <div class="stars-row" id="starsRow"></div>
+    <p id="rewardScore" class="reward-score"></p>
+    <div class="reward-btns">
+      <button id="againBtn" class="pill-btn green">Tekrar Oyna</button>
+      <button id="homeBtn" class="pill-btn blue">Ana Menü</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="fx"></canvas>
+
+<script src="util.js"></script>
+<script src="audio.js"></script>
+<script src="mascot.js"></script>
+<script src="fx.js"></script>
+<script src="game-numbers.js"></script>
+<script src="game-shapes.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
