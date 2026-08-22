@@ -1,7 +1,7 @@
 /* Alya'nın Oyunları — Service Worker */
 
 /* Uygulama dosyaları: her sürümde yenilenir */
-const CORE_CACHE = 'alya-core-v5.1.0';
+const CORE_CACHE = 'alya-core-v6.0.0';
 /* Ses ve görseller: sürümden bağımsız, bir kez inip kalır */
 const MEDIA_CACHE = 'alya-media-v1';
 
@@ -257,7 +257,22 @@ const GORSEL = [
   'rozet-4',
   'rozet-5',
   'sare',
-  'zeynep'
+  'zeynep',
+  'pati-normal',
+  'pati-mutlu',
+  'pati-alkis',
+  'pati-dusunuyor',
+  'pati-uzgun',
+  'pati-selam',
+  'kategori-temizlik',
+  'oyun-sofra',
+  'oyun-dis',
+  'oyun-elyikama',
+  'oyun-banyo',
+  'oyun-toplan',
+  'oyun-rutin',
+  'oyun-saglik',
+  'oyun-giyinme',
 ].map(id => './gorseller/' + id + '.webp');
 
 const MEDYA = SES.concat(GORSEL);

@@ -1,7 +1,16 @@
 /* ===== Oyun 4: Hafıza Oyunu (kart çevirme) ===== */
 window.GameMemory = (function () {
-  const HAVUZ = ['🍎','🍌','🍓','⭐','🐟','🎈','🐞','🌸','🍪','🐥','🦋','🚗',
-                 '🐱','🐘','🦆','🎩','⚽','🍇','🤖','🥁','🌹','🐓'];
+  // Her kartın adı var — çocuk eşleştirirken kelimeyi de görüyor
+  const HAVUZ = [
+    { e: '🍎', ad: 'Elma' },    { e: '🍌', ad: 'Muz' },      { e: '🍓', ad: 'Çilek' },
+    { e: '⭐', ad: 'Yıldız' },  { e: '🐟', ad: 'Balık' },    { e: '🎈', ad: 'Balon' },
+    { e: '🐞', ad: 'Uğur böceği' }, { e: '🌸', ad: 'Çiçek' }, { e: '🍪', ad: 'Kurabiye' },
+    { e: '🐥', ad: 'Civciv' },  { e: '🦋', ad: 'Kelebek' },  { e: '🚗', ad: 'Araba' },
+    { e: '🐱', ad: 'Kedi' },    { e: '🐘', ad: 'Fil' },      { e: '🦆', ad: 'Ördek' },
+    { e: '🎩', ad: 'Şapka' },   { e: '⚽', ad: 'Top' },      { e: '🍇', ad: 'Üzüm' },
+    { e: '🤖', ad: 'Robot' },   { e: '🥁', ad: 'Davul' },    { e: '🌹', ad: 'Gül' },
+    { e: '🐓', ad: 'Horoz' }
+  ];
   // seviye: çift sayısı
   const SEVIYELER = [3, 4, 6];
   const TOPLAM_CIFT = SEVIYELER.reduce((a, n) => a + n, 0); // 13
@@ -43,16 +52,34 @@ window.GameMemory = (function () {
     ctx.options.style.gridTemplateColumns = `repeat(${sutun},1fr)`;
     ctx.options.innerHTML = '';
 
-    kartlar.forEach(sym => {
+    kartlar.forEach(k => {
       const b = document.createElement('button');
       b.className = 'card';
-      b.innerHTML = `<span class="card-face back">🐾</span><span class="card-face front">${sym}</span>`;
-      b.dataset.sym = sym;
+      b.innerHTML = `<span class="card-face back">🐾</span>` +
+                    `<span class="card-face front" data-ad="${k.ad}">${k.e}</span>`;
+      b.dataset.sym = k.e;
+      b.dataset.ad = k.ad;
       b.addEventListener('click', () => cevir(b));
       ctx.options.appendChild(b);
     });
 
     ctx.setProgress(bulunan, TOPLAM_CIFT);
+    gozAt();
+  }
+
+  /* Seviye başında kartlara kısa bir "göz atma" — 4 yaş için hafızayı
+     zorlamadan çalıştıran klasik yöntem. Seviye büyüdükçe süre kısalır. */
+  function gozAt() {
+    const sure = [2600, 2200, 1800][seviye] || 1800;
+    const kartlar = [...ctx.options.querySelectorAll('.card')];
+    kilit = true;
+    kartlar.forEach(b => b.classList.add('open', 'onizleme'));
+    ctx.duck(1600);
+    ctx.say({ id: 'sys-hafiza-bak', text: 'Kartlara iyi bak!' });
+    setTimeout(() => {
+      kartlar.forEach(b => b.classList.remove('open', 'onizleme'));
+      kilit = false;
+    }, sure);
   }
 
   function cevir(b) {
@@ -71,8 +98,16 @@ window.GameMemory = (function () {
         const r = c.getBoundingClientRect();
         FX.confetti(30, r.left + r.width / 2, r.top + r.height / 2);
         ctx.happy();
-        ctx.duck(1100);
+        ctx.duck(1900);
         ctx.say({ id: 'sys-hafiza-esles', text: 'Eşleşti!' });
+        // eşleşen kartın adını söyle — kelime dağarcığı da gelişsin
+        const ad = a.dataset.ad || '';
+        if (ad) {
+          const kod = ad.toLocaleLowerCase('tr-TR').replace(/\s+/g, '')
+            .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i')
+            .replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u');
+          Snd.say({ id: 'ad-' + kod, text: ad }, { delay: 800, keep: true });
+        }
         bulunan++; kalan--;
         ctx.setProgress(bulunan, TOPLAM_CIFT);
         acik = []; kilit = false;

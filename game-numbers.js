@@ -16,6 +16,8 @@ window.GameNumbers = (function () {
     { e: '🚗', kod: 'araba',      cogul: 'Arabalar!' }
   ];
   const BW = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Sekiz', 'Dokuz', 'On'];
+  const BAS = 850;   // doğru cevaptan sonra saymaya başlama gecikmesi
+  const ADIM = 620;  // her nesne arası — 4 yaş için acele etmeyen tempo
   const NUM_COLORS = ['#FF4757', '#2E86FF', '#22C55E', '#FF8A00', '#8B5CF6', '#12C2C2', '#FF5FA2'];
 
   let order = [];
@@ -66,7 +68,19 @@ window.GameNumbers = (function () {
       sayFollow: { id: 'soru-' + n,
                    text: `${BW[n]}! Hangisinde ${WORDS[n]} tane var?`, delay: 950 },
       options: opts,
-      cols: 3
+      cols: 3,
+      // Doğru cevapta nesneleri tek tek sayar — çocuk saymayı hem duyar hem görür
+      bekle: BAS + n * ADIM + 1500,
+      onCorrectFx: (btn, yardim) => {
+        const ler = [...btn.querySelectorAll('.obj-grid span')];
+        ler.forEach((el, i) => setTimeout(() => {
+          el.style.setProperty('--no', i + 1);
+          el.classList.add('sayilan');
+          Snd.say({ id: 'sayi-' + (i + 1), text: BW[i + 1] }, { keep: i > 0 });
+        }, BAS + i * ADIM));
+        // sayma bitince övgü
+        yardim && yardim.praise(BAS + n * ADIM + 420);
+      }
     };
   }
 

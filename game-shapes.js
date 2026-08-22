@@ -10,13 +10,28 @@ window.GameShapes = (function () {
     { id: 'pembe',   n: 'pembe',   hex: '#FF5FA2', dark: '#C42C6E' }
   ];
   const SHAPES = [
-    { id: 'daire',  n: 'daire',      acc: 'daireyi' },
-    { id: 'kare',   n: 'kare',       acc: 'kareyi' },
-    { id: 'ucgen',  n: 'üçgen',      acc: 'üçgeni' },
-    { id: 'yildiz', n: 'yıldız',     acc: 'yıldızı' },
-    { id: 'kalp',   n: 'kalp',       acc: 'kalbi' },
-    { id: 'dikdortgen', n: 'dikdörtgen', acc: 'dikdörtgeni' }
+    { id: 'daire',  n: 'daire',  acc: 'daireyi',
+      not: 'Daire yuvarlaktır, hiç köşesi yoktur. Top gibi, tekerlek gibi.' },
+    { id: 'kare',   n: 'kare',   acc: 'kareyi',
+      not: 'Karenin dört köşesi ve dört eşit kenarı vardır.' },
+    { id: 'ucgen',  n: 'üçgen',  acc: 'üçgeni',
+      not: 'Üçgenin üç köşesi vardır. Çatı gibi sivridir.' },
+    { id: 'yildiz', n: 'yıldız', acc: 'yıldızı',
+      not: 'Yıldızın beş sivri ucu vardır, gökyüzünde parlar.' },
+    { id: 'kalp',   n: 'kalp',   acc: 'kalbi',
+      not: 'Kalp sevgiyi anlatır. Üstü iki tümsek, altı sivridir.' },
+    { id: 'dikdortgen', n: 'dikdörtgen', acc: 'dikdörtgeni',
+      not: 'Dikdörtgen de dört köşelidir ama kareden uzundur. Kapı gibi.' }
   ];
+  const RENK_NOT = {
+    kirmizi: 'Kırmızı elmanın, domatesin rengidir.',
+    mavi:    'Mavi gökyüzünün ve denizin rengidir.',
+    sari:    'Sarı güneşin ve muzun rengidir.',
+    yesil:   'Yeşil çimenin ve yaprakların rengidir.',
+    turuncu: 'Turuncu portakalın ve havucun rengidir.',
+    mor:     'Mor üzümün ve menekşenin rengidir.',
+    pembe:   'Pembe çiçeklerin ve pamuk şekerin rengidir.'
+  };
 
   function path(shapeId) {
     switch (shapeId) {
@@ -94,6 +109,9 @@ window.GameShapes = (function () {
           <div class="prompt-q">${cap(say)}</div>
         </div>`,
       say: { id: sesId, text: say },
+      aciklama: (type === 'shape' || type === 'both')
+        ? { id: 'not-sekil-' + tShape.id, text: tShape.not }
+        : { id: 'not-renk-' + tColor.id, text: RENK_NOT[tColor.id] },
       options: opts.map(o => ({ html: shapeSVG(o.s, o.c), correct: o.correct })),
       cols: 3
     };

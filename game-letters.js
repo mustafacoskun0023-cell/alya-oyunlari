@@ -89,6 +89,8 @@ window.GameLetters = (function () {
         </div>`,
       say: { id: 'harf-' + t.kod, text: t.h + '!' },
       sayFollow: { id: 'sys-harf-ses', text: 'Hangisi bu sesle başlıyor?', delay: 850 },
+      aciklama: { id: 'not-harf-' + t.kod,
+                  text: `${t.kel} kelimesi ${t.h} sesiyle başlar.` },
       options: secenekler.map(o => ({
         html: `<span class="opt-pic">${o.x.e}</span><span class="opt-cap">${o.x.kel}</span>`,
         correct: o.correct,

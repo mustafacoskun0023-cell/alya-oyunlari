@@ -284,26 +284,36 @@
       const r = btn.getBoundingClientRect();
       FX.confetti(80, r.left + r.width / 2, r.top + r.height / 2);
       catHappy();
-      Snd.duck(2200);
-      let bekle = 2000;
+      let bekle = q.bekle || 2000;
+      // Oyuna özel kutlama (ör. sayı oyununda nesneleri tek tek sayma)
+      if (q.onCorrectFx) {
+        try {
+          q.onCorrectFx(btn, {
+            praise: (gec) => Snd.say(U.pick(PRAISE), { delay: gec || 300, keep: true })
+          });
+        } catch (e) {}
+      }
       if (opt.onCorrect) {
         Snd.say(opt.onCorrect, { delay: 300 });
         Snd.say(U.pick(PRAISE), { delay: 1500, keep: true });
-        bekle = 2600;
-      } else {
+        bekle = Math.max(bekle, 2600);
+      } else if (!q.onCorrectFx) {
         Snd.say(U.pick(PRAISE), { delay: 380 });
       }
       // Öğretici kısım: neden doğru olduğunu anlat
       if (q.aciklama) {
+        const gec = q.onCorrectFx ? Math.max(1400, bekle - 900) : 1400;
         const kutu = document.createElement('div');
         kutu.className = 'aciklama-balon';
         kutu.textContent = q.aciklama.text;
         promptArea.appendChild(kutu);
-        requestAnimationFrame(() => kutu.classList.add('gorun'));
-        Snd.say(q.aciklama, { delay: 1400, keep: true });
-        Snd.duck(5200);
-        bekle = 5600;
+        setTimeout(() => {
+          promptArea.contains(kutu) && kutu.classList.add('gorun');
+        }, q.onCorrectFx ? gec - 200 : 30);
+        Snd.say(q.aciklama, { delay: gec, keep: true });
+        bekle = Math.max(bekle, gec + 4200);
       }
+      Snd.duck(Math.max(2200, bekle - 150));
       if (firstTry) correctFirst++;
       qi++;
       setProgress(qi, G.total);

@@ -66,11 +66,36 @@ window.Mascot = (function () {
 </svg>`;
   }
 
-  function render(el, mood) {
+  /* SVG yedeği — görsel yüklenmezse bu çizilir */
+  function svgRender(el, mood) {
     if (!el) return;
     el._img = null;
     el.innerHTML = svg(mood);
   }
+
+  /* ---- Pati (görsel karakter) ---- */
+  const PATI = { idle:'pati-normal', happy:'pati-mutlu', oops:'pati-uzgun',
+                 think:'pati-dusunuyor', clap:'pati-alkis', selam:'pati-selam',
+                 dua:'pati-normal' };
+
+  function gorselRender(el, mood, harita, yedek) {
+    if (!el) return;
+    const d = harita[mood] || harita.idle;
+    let img = el._img;
+    if (!img || img.parentNode !== el) {
+      el.innerHTML = '';
+      img = document.createElement('img');
+      img.alt = '';
+      img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block';
+      img.onerror = () => { el._img = null; yedek(el, mood); };
+      el.appendChild(img);
+      el._img = img;
+    }
+    const yeni = 'gorseller/' + d + '.webp';
+    if (!img.src.endsWith(yeni)) img.src = yeni;
+  }
+
+  function render(el, mood) { gorselRender(el, mood || 'idle', PATI, svgRender); }
 
   /* Geçici mood: belli süre sonra idle'a döner */
   function flash(el, mood, ms) {
@@ -84,22 +109,7 @@ window.Mascot = (function () {
   const MINA = { idle:'mina-normal', happy:'mina-mutlu', oops:'mina-uzgun',
                  dua:'mina-dua', think:'mina-dusunuyor', clap:'mina-alkis' };
 
-  function minaRender(el, mood) {
-    if (!el) return;
-    const d = MINA[mood] || MINA.idle;
-    let img = el._img;
-    if (!img || img.parentNode !== el) {
-      el.innerHTML = '';
-      img = document.createElement('img');
-      img.alt = '';
-      img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block';
-      img.onerror = () => { el._img = null; render(el, mood); };
-      el.appendChild(img);
-      el._img = img;
-    }
-    const yeni = 'gorseller/' + d + '.webp';
-    if (!img.src.endsWith(yeni)) img.src = yeni;
-  }
+  function minaRender(el, mood) { gorselRender(el, mood || 'idle', MINA, svgRender); }
 
   /* tip: 'kedi' | 'mina' */
   function set(el, tip, mood) {
