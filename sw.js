@@ -1,5 +1,5 @@
 /* Alya'nın Oyunları — Service Worker (tam offline) */
-const CACHE = 'alya-v3.0.0';
+const CACHE = 'alya-v4.0.0';
 
 /* Uygulamanın çalışması için zorunlu dosyalar */
 const CORE = [
@@ -201,11 +201,69 @@ const SES = [
   'abdest-1', 'abdest-2', 'abdest-3', 'abdest-4', 'abdest-5', 'abdest-6'
 ].map(id => './sesler/' + id + '.mp3');
 
+/* Görseller — eksik olan varsa kurulum bozulmaz */
+const GORSEL = [
+  'elif',
+  'kategori-ahlak',
+  'kategori-dini',
+  'kategori-hareket',
+  'kategori-harf',
+  'kategori-moda',
+  'kategori-yaratici',
+  'kategori-zeka',
+  'lina',
+  'mina-alkis',
+  'mina-dua',
+  'mina-dusunuyor',
+  'mina-mutlu',
+  'mina-normal',
+  'mina-uzgun',
+  'oyun-abdest',
+  'oyun-agac',
+  'oyun-arapharf',
+  'oyun-bahce',
+  'oyun-bayram',
+  'oyun-boyama',
+  'oyun-bugun',
+  'oyun-cami',
+  'oyun-cizim',
+  'oyun-dua',
+  'oyun-duygu',
+  'oyun-empati',
+  'oyun-gorev',
+  'oyun-guzelsoz',
+  'oyun-hareket',
+  'oyun-hikaye',
+  'oyun-ilahi',
+  'oyun-kabe',
+  'oyun-kelime',
+  'oyun-kombin',
+  'oyun-letters',
+  'oyun-memory',
+  'oyun-moda',
+  'oyun-muzik',
+  'oyun-nefes',
+  'oyun-numbers',
+  'oyun-paylasma',
+  'oyun-peygamber',
+  'oyun-ramazan',
+  'oyun-renkuyum',
+  'oyun-shapes',
+  'rozet-1',
+  'rozet-2',
+  'rozet-3',
+  'rozet-4',
+  'rozet-5',
+  'sare',
+  'zeynep'
+].map(id => './gorseller/' + id + '.webp');
+
 self.addEventListener('install', e => {
   e.waitUntil((async () => {
     const c = await caches.open(CACHE);
     await c.addAll(CORE);                                  // zorunlu
     await Promise.allSettled(SES.map(u => c.add(u)));      // opsiyonel
+    await Promise.allSettled(GORSEL.map(u => c.add(u)));   // opsiyonel
     self.skipWaiting();
   })());
 });

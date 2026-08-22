@@ -107,6 +107,12 @@ body::before{
 }
 .game-card::after{content:"";position:absolute;inset:0;border-radius:var(--card-r);border:5px solid rgba(255,255,255,.65);pointer-events:none}
 .game-card .emoji{font-size:clamp(34px,10vh,84px);line-height:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,.18))}
+.kart-gorsel{
+  width:auto;height:clamp(40px,11vh,96px);max-width:82%;object-fit:contain;display:block;
+  filter:drop-shadow(0 4px 5px rgba(43,27,84,.25));
+}
+.kart-gorsel.emoji-yedek{font-size:clamp(34px,10vh,84px);line-height:1;height:auto}
+.game-card.locked .kart-gorsel{filter:grayscale(1) opacity(.5)}
 .game-card .label{font-size:clamp(13px,3vh,26px);text-align:center;line-height:1.15;padding:0 4px}
 .game-card:not(.locked):active{transform:scale(.94)}
 .game-card.locked{background:#C8CBD8;color:#7A7E92;box-shadow:0 6px 0 rgba(0,0,0,.1)}
@@ -371,3 +377,19 @@ body::before{
 @media (orientation:portrait){
   .abdest-grid{grid-template-columns:repeat(2,1fr) !important}
 }
+
+
+/* ===== Seviye rozeti (menü üst bar) ===== */
+.brand-stars{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.seviye-rozet{
+  width:clamp(20px,3.4vh,30px);height:auto;display:block;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.2));
+}
+.seviye-ad{
+  font-size:clamp(10px,1.7vh,15px);color:#fff;opacity:.9;font-weight:700;
+  background:rgba(255,255,255,.2);border-radius:999px;padding:1px 9px;white-space:nowrap;
+}
+@media (orientation:portrait) and (max-width:520px){ .seviye-ad{display:none} }
+
+/* Mina köşe maskotu görselken biraz büyüsün */
+.mascot-corner img{filter:drop-shadow(0 4px 5px rgba(43,27,84,.28))}

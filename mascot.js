@@ -79,5 +79,29 @@ window.Mascot = (function () {
     el._mt = setTimeout(() => render(el, 'idle'), ms || 1600);
   }
 
-  return { svg, render, flash };
+  /* ---- Mina (görsel karakter) ---- */
+  const MINA = { idle:'mina-normal', happy:'mina-mutlu', oops:'mina-uzgun',
+                 dua:'mina-dua', think:'mina-dusunuyor', clap:'mina-alkis' };
+
+  function minaRender(el, mood) {
+    if (!el) return;
+    const d = MINA[mood] || MINA.idle;
+    el.innerHTML = `<img src="gorseller/${d}.webp" alt="" style="width:100%;height:100%;object-fit:contain;display:block"
+      onerror="this.replaceWith(Object.assign(document.createElement('div'),{innerHTML:window.Mascot.svg('${mood||'idle'}')}))">`;
+  }
+
+  /* tip: 'kedi' | 'mina' */
+  function set(el, tip, mood) {
+    if (!el) return;
+    el._tip = tip;
+    if (tip === 'mina') minaRender(el, mood); else render(el, mood);
+  }
+  function flashTip(el, mood, ms) {
+    if (!el) return;
+    set(el, el._tip || 'kedi', mood);
+    clearTimeout(el._mt);
+    el._mt = setTimeout(() => set(el, el._tip || 'kedi', 'idle'), ms || 1600);
+  }
+
+  return { svg, render, flash, set, flashTip, minaRender };
 })();

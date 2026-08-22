@@ -90,18 +90,42 @@
   function show(name) {
     Object.keys(screens).forEach(k => screens[k].classList.toggle('active', k === name));
   }
-  function renderStars() { $('#totalStars').textContent = '⭐ ' + totalStars; }
+  const SEVIYELER = [
+    { min:   0, no: 1, ad: 'Bismillah Öğrencisi' },
+    { min:  10, no: 2, ad: 'İyilik Çırağı' },
+    { min:  25, no: 3, ad: 'Merhamet Dostu' },
+    { min:  50, no: 4, ad: 'Güzel Ahlak Kahramanı' },
+    { min: 100, no: 5, ad: 'Minik İyilik Elçisi' }
+  ];
+  function seviye(y) { return SEVIYELER.slice().reverse().find(s => y >= s.min) || SEVIYELER[0]; }
+
+  function renderStars() {
+    const sv = seviye(totalStars);
+    $('#totalStars').innerHTML =
+      `<img class="seviye-rozet" src="gorseller/rozet-${sv.no}.webp" alt=""
+         onerror="this.remove()"><span>⭐ ${totalStars}</span>` +
+      `<span class="seviye-ad">${sv.ad}</span>`;
+  }
 
   const menuBackBtn = $('#menuBackBtn');
   const topbar = $('#topbar');
   const brandTitle = $('#brandTitle');
   let acikKategori = null;
 
+  const GORSEL = 'gorseller/';
+  function gorselli(dosya, emoji, sinif) {
+    // görsel yoksa emoji'ye düşer, uygulama bozulmaz
+    return `<img class="${sinif}" src="${GORSEL}${dosya}.webp" alt="" loading="lazy"
+              onerror="this.replaceWith(Object.assign(document.createElement('span'),
+                       {className:'${sinif} emoji-yedek',textContent:'${emoji}'}))">`;
+  }
+
   function kart(o, tiklama) {
     const b = document.createElement('button');
     b.className = 'game-card' + (o.ready === false ? ' locked' : '');
     if (o.bg) b.style.background = o.bg;
-    b.innerHTML = `<span class="emoji">${o.emoji}</span><span class="label">${o.label}</span>` +
+    b.innerHTML = gorselli(o.gorsel, o.emoji, 'kart-gorsel') +
+                  `<span class="label">${o.label}</span>` +
                   (o.ready === false ? '<span class="soon-tag">YAKINDA</span>' : '') +
                   (o.rozet ? `<span class="card-badge">${o.rozet}</span>` : '');
     b.addEventListener('click', tiklama);
@@ -117,7 +141,7 @@
     KATEGORILER.forEach(k => {
       const hazir = k.oyunlar.filter(o => o.ready).length;
       grid.appendChild(kart(
-        { emoji: k.emoji, label: k.ad, bg: k.bg, ready: true,
+        { emoji: k.emoji, gorsel: 'kategori-' + k.id, label: k.ad, bg: k.bg, ready: true,
           rozet: hazir ? hazir + ' oyun' : 'yakında' },
         () => { Snd.sfx.tap(); openCategory(k.id); }
       ));
@@ -133,6 +157,7 @@
     const grid = $('#menuGrid');
     grid.innerHTML = '';
     k.oyunlar.forEach(o => {
+      o.gorsel = 'oyun-' + o.id;
       grid.appendChild(kart(o, () => {
         if (o.ready) { Snd.sfx.tap(); startGame(o.id); }
         else {
@@ -157,12 +182,17 @@
   let G = null, qi = 0, q = null, firstTry = true, correctFirst = 0, locked = false;
   const gameCat = $('#gameCat'), promptArea = $('#promptArea'), optionsArea = $('#optionsArea');
 
+  const MINA_KATEGORI = ['dini', 'ahlak', 'moda'];
+  function oyunKategorisi(oyunId) {
+    const k = KATEGORILER.find(x => x.oyunlar.some(o => o.id === oyunId));
+    return k ? k.id : null;
+  }
   function catHappy() {
-    Mascot.flash(gameCat, 'happy', 1800);
+    Mascot.flashTip(gameCat, 'happy', 1800);
     gameCat.classList.add('happy');
     setTimeout(() => gameCat.classList.remove('happy'), 1300);
   }
-  function catOops() { Mascot.flash(gameCat, 'oops', 1400); }
+  function catOops() { Mascot.flashTip(gameCat, 'oops', 1400); }
 
   function setProgress(cur, total) {
     $('#progressLabel').textContent = cur + ' / ' + total;
@@ -174,7 +204,8 @@
     if (!G) return;
     qi = 0; correctFirst = 0;
     show('game');
-    Mascot.render(gameCat, 'idle');
+    const kat = oyunKategorisi(id);
+    Mascot.set(gameCat, MINA_KATEGORI.includes(kat) ? 'mina' : 'kedi', 'idle');
     optionsArea.className = 'options-area';
     optionsArea.style.gridTemplateColumns = '';
     $('#repeatBtn').style.visibility = G.mode === 'custom' ? 'hidden' : 'visible';
@@ -268,7 +299,7 @@
     $('#rewardScore').textContent = altYazi;
     const row = $('#starsRow');
     row.innerHTML = '<span class="st">⭐</span><span class="st">⭐</span><span class="st">⭐</span>';
-    Mascot.render($('#rewardCat'), 'happy');
+    Mascot.set($('#rewardCat'), gameCat._tip || 'kedi', 'happy');
     show('reward');
 
     Snd.sfx.fanfare();
