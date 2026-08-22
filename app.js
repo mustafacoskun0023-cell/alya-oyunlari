@@ -9,18 +9,57 @@
     numbers: window.GameNumbers,
     shapes:  window.GameShapes,
     letters: window.GameLetters,
-    memory:  window.GameMemory
+    memory:  window.GameMemory,
+    dua:     window.GameDua,
+    abdest:  window.GameAbdest
   };
 
-  const MENU = [
-    { id: 'numbers', emoji: '🔢', label: 'Sayıları<br>Öğren',      bg: '#FFE7C2', ready: true },
-    { id: 'shapes',  emoji: '🎨', label: 'Renkler ve<br>Şekiller', bg: '#D9ECFF', ready: true },
-    { id: 'letters', emoji: '🔤', label: 'Harfleri<br>Öğren',      bg: '#E5FBD8', ready: true },
-    { id: 'memory',  emoji: '🧠', label: 'Hafıza<br>Oyunu',        bg: '#FFE0EF', ready: true },
-    { id: 'arabic',  emoji: '🕌', label: 'Arap<br>Harfleri',  ready: false },
-    { id: 'move',    emoji: '🥋', label: 'Hareket<br>Oyunu',  ready: false },
-    { id: 'emotion', emoji: '😊', label: 'Duyguları<br>Tanı', ready: false },
-    { id: 'draw',    emoji: '🖍️', label: 'Çizim ve<br>Boyama', ready: false }
+  const KATEGORILER = [
+    { id: 'zeka', ad: 'Zeka<br>Oyunları', emoji: '🧠', bg: '#FFE7C2', oyunlar: [
+      { id: 'numbers', emoji: '🔢', label: 'Sayıları<br>Öğren',      bg: '#FFE7C2', ready: true },
+      { id: 'shapes',  emoji: '🎨', label: 'Renkler ve<br>Şekiller', bg: '#D9ECFF', ready: true },
+      { id: 'memory',  emoji: '🧩', label: 'Hafıza<br>Oyunu',        bg: '#FFE0EF', ready: true }
+    ]},
+    { id: 'harf', ad: 'Harfler<br>ve Dil', emoji: '🔤', bg: '#E5FBD8', oyunlar: [
+      { id: 'letters', emoji: '🔤', label: 'Harfleri<br>Öğren', bg: '#E5FBD8', ready: true },
+      { id: 'kelime',  emoji: '💬', label: 'Kelime<br>Dağarcığı', ready: false },
+      { id: 'hikaye',  emoji: '📖', label: 'Hikaye<br>Dinle',     ready: false }
+    ]},
+    { id: 'dini', ad: 'Dini<br>Eğitim', emoji: '🕌', bg: '#E8E2FF', oyunlar: [
+      { id: 'dua',       emoji: '🤲', label: 'Dua<br>Eşleştirme',  bg: '#E8E2FF', ready: true },
+      { id: 'abdest',    emoji: '💧', label: 'Abdest<br>Puzzle',   bg: '#D9F3FF', ready: true },
+      { id: 'arapharf',  emoji: '📿', label: 'Arap<br>Harfleri',       ready: false },
+      { id: 'cami',      emoji: '🕌', label: "Cami'yi<br>Bul",         ready: false },
+      { id: 'kabe',      emoji: '🕋', label: 'Minik Kâbe<br>Yolculuğu',ready: false },
+      { id: 'ramazan',   emoji: '🌙', label: "Ramazan'ı<br>Keşfet",    ready: false },
+      { id: 'bayram',    emoji: '🎁', label: 'Bayram<br>Hazırlığı',    ready: false },
+      { id: 'peygamber', emoji: '📜', label: 'Peygamber<br>Hikayeleri',ready: false },
+      { id: 'agac',      emoji: '🌳', label: 'İyilik<br>Ağacı',        ready: false }
+    ]},
+    { id: 'ahlak', ad: 'Ahlak ve<br>Arkadaşlık', emoji: '💗', bg: '#FFE0EF', oyunlar: [
+      { id: 'duygu',    emoji: '😊', label: 'Duyguları<br>Tanı',      ready: false },
+      { id: 'empati',   emoji: '🤝', label: 'Empati<br>Oyunu',        ready: false },
+      { id: 'paylasma', emoji: '🎈', label: 'Paylaşma<br>Zamanı',     ready: false },
+      { id: 'guzelsoz', emoji: '💌', label: 'Güzel<br>Sözler',        ready: false },
+      { id: 'gorev',    emoji: '⭐', label: 'Arkadaşlık<br>Görevleri',ready: false },
+      { id: 'bugun',    emoji: '🌟', label: 'Bugünün<br>İyiliği',     ready: false },
+      { id: 'bahce',    emoji: '🌷', label: 'Dostluk<br>Bahçesi',     ready: false }
+    ]},
+    { id: 'moda', ad: 'Moda<br>ve Stil', emoji: '👗', bg: '#FFE4F1', oyunlar: [
+      { id: 'moda',     emoji: '👗', label: 'Moda<br>Atölyesi', ready: false },
+      { id: 'kombin',   emoji: '👜', label: 'Kombin<br>Oyunu',  ready: false },
+      { id: 'renkuyum', emoji: '🎀', label: 'Renk<br>Uyumu',    ready: false }
+    ]},
+    { id: 'yaratici', ad: 'Yaratıcılık', emoji: '🖍️', bg: '#FFF3C4', oyunlar: [
+      { id: 'boyama', emoji: '🖍️', label: 'Boyama<br>Kitabı',   ready: false },
+      { id: 'cizim',  emoji: '✏️', label: 'Serbest<br>Çizim',   ready: false },
+      { id: 'muzik',  emoji: '🥁', label: 'Müzik<br>ve Ritim',  ready: false },
+      { id: 'ilahi',  emoji: '🎶', label: 'İlahi ve<br>Şarkılar',ready: false }
+    ]},
+    { id: 'hareket', ad: 'Hareket', emoji: '🥋', bg: '#DFF6EA', oyunlar: [
+      { id: 'hareket', emoji: '🥋', label: 'Hareket<br>Oyunu',  ready: false },
+      { id: 'nefes',   emoji: '🌬️', label: 'Nefes<br>Egzersizi', ready: false }
+    ]}
   ];
 
   const PRAISE = [
@@ -53,23 +92,58 @@
   }
   function renderStars() { $('#totalStars').textContent = '⭐ ' + totalStars; }
 
+  const menuBackBtn = $('#menuBackBtn');
+  const topbar = $('#topbar');
+  const brandTitle = $('#brandTitle');
+  let acikKategori = null;
+
+  function kart(o, tiklama) {
+    const b = document.createElement('button');
+    b.className = 'game-card' + (o.ready === false ? ' locked' : '');
+    if (o.bg) b.style.background = o.bg;
+    b.innerHTML = `<span class="emoji">${o.emoji}</span><span class="label">${o.label}</span>` +
+                  (o.ready === false ? '<span class="soon-tag">YAKINDA</span>' : '') +
+                  (o.rozet ? `<span class="card-badge">${o.rozet}</span>` : '');
+    b.addEventListener('click', tiklama);
+    return b;
+  }
+
   function buildMenu() {
+    acikKategori = null;
+    topbar.classList.remove('in-category');
+    brandTitle.innerHTML = "Alya'nın Oyunları";
     const grid = $('#menuGrid');
     grid.innerHTML = '';
-    MENU.forEach(m => {
-      const b = document.createElement('button');
-      b.className = 'game-card' + (m.ready ? '' : ' locked');
-      if (m.bg) b.style.background = m.bg;
-      b.innerHTML = `<span class="emoji">${m.emoji}</span><span class="label">${m.label}</span>` +
-                    (m.ready ? '' : '<span class="soon-tag">YAKINDA</span>');
-      if (m.ready) b.addEventListener('click', () => { Snd.sfx.tap(); startGame(m.id); });
-      else b.addEventListener('click', () => {
-        Snd.sfx.whoosh();
-        Snd.say({ id: 'sys-yakinda', text: 'Bu oyun çok yakında geliyor!' });
-      });
-      grid.appendChild(b);
+    KATEGORILER.forEach(k => {
+      const hazir = k.oyunlar.filter(o => o.ready).length;
+      grid.appendChild(kart(
+        { emoji: k.emoji, label: k.ad, bg: k.bg, ready: true,
+          rozet: hazir ? hazir + ' oyun' : 'yakında' },
+        () => { Snd.sfx.tap(); openCategory(k.id); }
+      ));
     });
   }
+
+  function openCategory(id) {
+    const k = KATEGORILER.find(x => x.id === id);
+    if (!k) return;
+    acikKategori = id;
+    topbar.classList.add('in-category');
+    brandTitle.innerHTML = k.ad.replace(/<br>/g, ' ');
+    const grid = $('#menuGrid');
+    grid.innerHTML = '';
+    k.oyunlar.forEach(o => {
+      grid.appendChild(kart(o, () => {
+        if (o.ready) { Snd.sfx.tap(); startGame(o.id); }
+        else {
+          Snd.sfx.whoosh();
+          Snd.say({ id: 'sys-yakinda', text: 'Bu oyun çok yakında geliyor!' });
+        }
+      }));
+    });
+  }
+
+  menuBackBtn.addEventListener('click', () => { Snd.sfx.tap(); Snd.stopVoice(); buildMenu(); });
 
   const musicBtn = $('#musicBtn');
   function syncMusicBtn() { musicBtn.setAttribute('aria-pressed', Snd.musicOn ? 'true' : 'false'); }
@@ -216,7 +290,11 @@
   function customFinish(stars, altYazi) { odul(stars, altYazi); }
 
   /* ---------- butonlar ---------- */
-  function eveDon() { Snd.stopVoice(); Snd.sfx.tap(); FX.clear(); show('menu'); }
+  function eveDon() {
+    Snd.stopVoice(); Snd.sfx.tap(); FX.clear();
+    if (acikKategori) openCategory(acikKategori);
+    show('menu');
+  }
   $('#backBtn').addEventListener('click', eveDon);
   $('#homeBtn').addEventListener('click', eveDon);
   $('#repeatBtn').addEventListener('click', () => { if (q && G && G.mode !== 'custom') sayQuestion(); });

@@ -1,5 +1,5 @@
 /* Alya'nın Oyunları — Service Worker (tam offline) */
-const CACHE = 'alya-v2.1.0';
+const CACHE = 'alya-v3.0.0';
 
 /* Uygulamanın çalışması için zorunlu dosyalar */
 const CORE = [
@@ -15,6 +15,8 @@ const CORE = [
   './game-shapes.js',
   './game-letters.js',
   './game-memory.js',
+  './game-dua.js',
+  './game-abdest.js',
   './app.js',
   './icon-192.png',
   './icon-512.png',
@@ -190,7 +192,13 @@ const SES = [
   'kelime-uzum',
   'kelime-vazo',
   'kelime-yildiz',
-  'kelime-zurafa'
+  'kelime-zurafa',
+  'sys-oyun-dua', 'sys-oyun-abdest', 'sys-abdest-devam',
+  'soz-bismillah', 'soz-elhamdulillah', 'soz-masallah',
+  'soz-insallah', 'soz-selam', 'soz-razi',
+  'dua-yemek-basi', 'dua-yemek-sonu', 'dua-guzel', 'dua-eve-girer', 'dua-yardim',
+  'dua-yarin', 'dua-ise-basla', 'dua-iyilesme', 'dua-bebek', 'dua-cami',
+  'abdest-1', 'abdest-2', 'abdest-3', 'abdest-4', 'abdest-5', 'abdest-6'
 ].map(id => './sesler/' + id + '.mp3');
 
 self.addEventListener('install', e => {
