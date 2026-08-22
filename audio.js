@@ -72,12 +72,17 @@ window.Snd = (function () {
 
     let a = preloaded.get(id);
     if (!a) { a = new Audio(CLIP_DIR + id + '.mp3'); a.preload = 'auto'; }
-    a.currentTime = 0;
+    try { a.currentTime = 0; } catch (e) {}
     curAudio = a;
-    const fallback = () => { if (!missing.has(id)) { missing.add(id); speak(text, opts); } };
-    a.onerror = fallback;
+    let dustu = false;
+    // Dosya gerçekten yoksa (404) bir daha denemeyelim
+    a.onerror = () => {
+      missing.add(id); preloaded.delete(id);
+      if (!dustu) { dustu = true; speak(text, opts); }
+    };
+    // play() reddi genelde geçici (otomatik oynatma politikası) — klibi kalıcı silme
     const pr = a.play();
-    if (pr && pr.catch) pr.catch(fallback);
+    if (pr && pr.catch) pr.catch(() => { if (!dustu) { dustu = true; speak(text, opts); } });
   }
 
   /* Bir sonraki soruların kliplerini sessizce indir */
