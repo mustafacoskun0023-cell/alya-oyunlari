@@ -393,3 +393,46 @@ body::before{
 
 /* Mina köşe maskotu görselken biraz büyüsün */
 .mascot-corner img{filter:drop-shadow(0 4px 5px rgba(43,27,84,.28))}
+
+/* ===== Açıklama balonu (öğretici kısım) ===== */
+.aciklama-balon{
+  position:absolute;left:50%;top:100%;transform:translate(-50%,-6px) scale(.9);
+  width:min(88vw,760px);margin-top:8px;
+  background:#fff;color:var(--ink);border-radius:22px;
+  padding:clamp(9px,1.8vh,16px) clamp(14px,3vw,28px);
+  font-size:clamp(13px,2.4vh,23px);font-weight:800;line-height:1.3;text-align:center;
+  box-shadow:0 8px 0 rgba(0,0,0,.13),0 12px 26px rgba(43,27,84,.25);
+  opacity:0;transition:.35s cubic-bezier(.2,.9,.3,1.5);z-index:6;pointer-events:none;
+}
+.aciklama-balon::before{
+  content:"";position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  border:10px solid transparent;border-bottom-color:#fff;border-top:0;
+}
+.aciklama-balon.gorun{opacity:1;transform:translate(-50%,0) scale(1)}
+.prompt-area{position:relative}
+
+/* ===== Davranış kartları (sofra adabı) ===== */
+.davranis{display:flex;flex-direction:column;align-items:center;gap:clamp(4px,1.4vh,14px);padding:0 6px}
+.davranis-e{font-size:min(34cqh,26cqw,13vh);line-height:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,.2))}
+.davranis-t{font-size:clamp(14px,2.7vh,27px);text-align:center;line-height:1.2;color:var(--ink)}
+@supports not (container-type:size){ .davranis-e{font-size:clamp(34px,9vh,80px)} }
+
+/* ===== Diş fırçalama ===== */
+.dis-sayac{
+  margin-top:6px;color:#fff;font-size:clamp(13px,2.3vh,22px);
+  background:rgba(255,255,255,.22);border-radius:999px;padding:2px 14px;display:inline-block;
+}
+.dis-alan{place-items:center}
+.agiz-kutu{
+  position:relative;width:min(92%,760px);touch-action:none;cursor:crosshair;
+  background:#fff;border-radius:34px;padding:clamp(10px,2.4vh,26px);
+  box-shadow:var(--shadow);
+}
+#agiz{width:100%;height:auto;display:block}
+#agiz .dis{fill:#E8DFA8;stroke:#B9A94E;stroke-width:3;transition:fill .25s,stroke .25s}
+#agiz .dis.temiz{fill:#FFFFFF;stroke:#CFE6F5}
+.firca{
+  position:absolute;left:0;top:0;transform:translate(-50%,-50%) rotate(-25deg);
+  font-size:clamp(34px,7vh,64px);pointer-events:none;opacity:0;
+  transition:opacity .2s;filter:drop-shadow(0 3px 3px rgba(0,0,0,.25));
+}

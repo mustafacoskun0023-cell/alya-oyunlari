@@ -68,6 +68,7 @@ window.Mascot = (function () {
 
   function render(el, mood) {
     if (!el) return;
+    el._img = null;
     el.innerHTML = svg(mood);
   }
 
@@ -86,8 +87,18 @@ window.Mascot = (function () {
   function minaRender(el, mood) {
     if (!el) return;
     const d = MINA[mood] || MINA.idle;
-    el.innerHTML = `<img src="gorseller/${d}.webp" alt="" style="width:100%;height:100%;object-fit:contain;display:block"
-      onerror="this.replaceWith(Object.assign(document.createElement('div'),{innerHTML:window.Mascot.svg('${mood||'idle'}')}))">`;
+    let img = el._img;
+    if (!img || img.parentNode !== el) {
+      el.innerHTML = '';
+      img = document.createElement('img');
+      img.alt = '';
+      img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block';
+      img.onerror = () => { el._img = null; render(el, mood); };
+      el.appendChild(img);
+      el._img = img;
+    }
+    const yeni = 'gorseller/' + d + '.webp';
+    if (!img.src.endsWith(yeni)) img.src = yeni;
   }
 
   /* tip: 'kedi' | 'mina' */

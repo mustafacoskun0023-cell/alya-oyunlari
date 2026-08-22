@@ -11,7 +11,9 @@
     letters: window.GameLetters,
     memory:  window.GameMemory,
     dua:     window.GameDua,
-    abdest:  window.GameAbdest
+    abdest:  window.GameAbdest,
+    sofra:   window.GameSofra,
+    dis:     window.GameDis
   };
 
   const KATEGORILER = [
@@ -44,6 +46,16 @@
       { id: 'gorev',    emoji: '⭐', label: 'Arkadaşlık<br>Görevleri',ready: false },
       { id: 'bugun',    emoji: '🌟', label: 'Bugünün<br>İyiliği',     ready: false },
       { id: 'bahce',    emoji: '🌷', label: 'Dostluk<br>Bahçesi',     ready: false }
+    ]},
+    { id: 'temizlik', ad: 'Temizlik<br>ve Görgü', emoji: '🧼', bg: '#DDF4FF', oyunlar: [
+      { id: 'sofra',    emoji: '🍽️', label: 'Sofra<br>Adabı',      bg: '#FFF0DC', ready: true },
+      { id: 'dis',      emoji: '🪥', label: 'Diş<br>Fırçalama',    bg: '#DDF4FF', ready: true },
+      { id: 'elyikama', emoji: '🧼', label: 'El<br>Yıkama',        ready: false },
+      { id: 'banyo',    emoji: '🛁', label: 'Banyo<br>Zamanı',     ready: false },
+      { id: 'toplan',   emoji: '🧺', label: 'Toplanma<br>Vakti',   ready: false },
+      { id: 'rutin',    emoji: '⏰', label: 'Günlük<br>Rutinim',   ready: false },
+      { id: 'saglik',   emoji: '🤧', label: 'Hapşırma<br>Adabı',   ready: false },
+      { id: 'giyinme',  emoji: '👟', label: 'Giyinme<br>ve Düzen', ready: false }
     ]},
     { id: 'moda', ad: 'Moda<br>ve Stil', emoji: '👗', bg: '#FFE4F1', oyunlar: [
       { id: 'moda',     emoji: '👗', label: 'Moda<br>Atölyesi', ready: false },
@@ -182,7 +194,7 @@
   let G = null, qi = 0, q = null, firstTry = true, correctFirst = 0, locked = false;
   const gameCat = $('#gameCat'), promptArea = $('#promptArea'), optionsArea = $('#optionsArea');
 
-  const MINA_KATEGORI = ['dini', 'ahlak', 'moda'];
+  const MINA_KATEGORI = ['dini', 'ahlak', 'moda', 'temizlik'];
   function oyunKategorisi(oyunId) {
     const k = KATEGORILER.find(x => x.oyunlar.some(o => o.id === oyunId));
     return k ? k.id : null;
@@ -273,16 +285,29 @@
       FX.confetti(80, r.left + r.width / 2, r.top + r.height / 2);
       catHappy();
       Snd.duck(2200);
+      let bekle = 2000;
       if (opt.onCorrect) {
         Snd.say(opt.onCorrect, { delay: 300 });
         Snd.say(U.pick(PRAISE), { delay: 1500, keep: true });
+        bekle = 2600;
       } else {
         Snd.say(U.pick(PRAISE), { delay: 380 });
+      }
+      // Öğretici kısım: neden doğru olduğunu anlat
+      if (q.aciklama) {
+        const kutu = document.createElement('div');
+        kutu.className = 'aciklama-balon';
+        kutu.textContent = q.aciklama.text;
+        promptArea.appendChild(kutu);
+        requestAnimationFrame(() => kutu.classList.add('gorun'));
+        Snd.say(q.aciklama, { delay: 1400, keep: true });
+        Snd.duck(5200);
+        bekle = 5600;
       }
       if (firstTry) correctFirst++;
       qi++;
       setProgress(qi, G.total);
-      setTimeout(nextQuestion, opt.onCorrect ? 2600 : 2000);
+      setTimeout(nextQuestion, bekle);
     } else {
       firstTry = false;
       btn.classList.remove('wrong'); void btn.offsetWidth; btn.classList.add('wrong');
@@ -375,6 +400,16 @@
   });
 
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+      // Ses ve görselleri sayfa tamamen açıldıktan SONRA indirt —
+      // açılışta hepsini birden çekmek uygulamayı kasıyordu.
+      navigator.serviceWorker.ready.then(reg => {
+        setTimeout(() => {
+          const sw = reg.active || navigator.serviceWorker.controller;
+          if (sw) sw.postMessage({ tip: 'medya-yukle' });
+        }, 5000);
+      }).catch(() => {});
+    });
   }
 })();

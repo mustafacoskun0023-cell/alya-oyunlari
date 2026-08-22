@@ -1,7 +1,10 @@
-/* Alya'nın Oyunları — Service Worker (tam offline) */
-const CACHE = 'alya-v4.0.0';
+/* Alya'nın Oyunları — Service Worker */
 
-/* Uygulamanın çalışması için zorunlu dosyalar */
+/* Uygulama dosyaları: her sürümde yenilenir */
+const CORE_CACHE = 'alya-core-v5.1.0';
+/* Ses ve görseller: sürümden bağımsız, bir kez inip kalır */
+const MEDIA_CACHE = 'alya-media-v1';
+
 const CORE = [
   './',
   './index.html',
@@ -17,14 +20,14 @@ const CORE = [
   './game-memory.js',
   './game-dua.js',
   './game-abdest.js',
+'./game-sofra.js',
+'./game-dis.js',
   './app.js',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png'
 ];
 
-/* Seslendirme klipleri — eksik olan varsa kurulum bozulmaz, sadece o klip atlanır
-   (uygulama o cümleyi cihazın kendi ses motoruyla okur) */
 const SES = [
   'sys-merhaba',
   'sys-oyun-sayi',
@@ -201,7 +204,6 @@ const SES = [
   'abdest-1', 'abdest-2', 'abdest-3', 'abdest-4', 'abdest-5', 'abdest-6'
 ].map(id => './sesler/' + id + '.mp3');
 
-/* Görseller — eksik olan varsa kurulum bozulmaz */
 const GORSEL = [
   'elif',
   'kategori-ahlak',
@@ -258,22 +260,47 @@ const GORSEL = [
   'zeynep'
 ].map(id => './gorseller/' + id + '.webp');
 
+const MEDYA = SES.concat(GORSEL);
+
+/* Kurulum: SADECE uygulama dosyaları. Medyayı burada indirmiyoruz —
+   yoksa ilk açılışta 158 istek ağı tıkıyor ve uygulama geç açılıyor. */
 self.addEventListener('install', e => {
-  e.waitUntil((async () => {
-    const c = await caches.open(CACHE);
-    await c.addAll(CORE);                                  // zorunlu
-    await Promise.allSettled(SES.map(u => c.add(u)));      // opsiyonel
-    await Promise.allSettled(GORSEL.map(u => c.add(u)));   // opsiyonel
-    self.skipWaiting();
-  })());
+  e.waitUntil(
+    caches.open(CORE_CACHE)
+      .then(c => c.addAll(CORE))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CORE_CACHE && k !== MEDIA_CACHE).map(k => caches.delete(k))
+      ))
       .then(() => self.clients.claim())
   );
+});
+
+/* Medyayı sayfa tamamen açıldıktan sonra, azar azar indir */
+let medyaCalisiyor = false;
+async function medyaDoldur() {
+  if (medyaCalisiyor) return;
+  medyaCalisiyor = true;
+  try {
+    const c = await caches.open(MEDIA_CACHE);
+    const eksik = [];
+    for (const u of MEDYA) { if (!(await c.match(u))) eksik.push(u); }
+    // 5'erli gruplar hâlinde, aralarda nefes payı bırakarak
+    for (let i = 0; i < eksik.length; i += 5) {
+      await Promise.allSettled(eksik.slice(i, i + 5).map(u => c.add(u).catch(() => {})));
+      await new Promise(r => setTimeout(r, 120));
+    }
+  } catch (e) {} finally { medyaCalisiyor = false; }
+}
+
+self.addEventListener('message', e => {
+  if (e.data && e.data.tip === 'medya-yukle') e.waitUntil(medyaDoldur());
 });
 
 self.addEventListener('fetch', e => {
@@ -282,27 +309,32 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
 
+  // Gezinme: önce ağ, olmazsa cache
   if (req.mode === 'navigate') {
     e.respondWith(
       fetch(req).then(r => {
         const copy = r.clone();
-        caches.open(CACHE).then(c => c.put('./index.html', copy));
+        caches.open(CORE_CACHE).then(c => c.put('./index.html', copy));
         return r;
       }).catch(() => caches.match('./index.html'))
     );
     return;
   }
 
-  e.respondWith(
-    caches.match(req).then(hit => {
-      const net = fetch(req).then(r => {
-        if (r && r.status === 200) {
-          const copy = r.clone();
-          caches.open(CACHE).then(c => c.put(req, copy));
-        }
-        return r;
-      }).catch(() => hit);
-      return hit || net;
-    })
-  );
+  const medyaMi = url.pathname.includes('/sesler/') || url.pathname.includes('/gorseller/');
+
+  e.respondWith((async () => {
+    const hit = await caches.match(req);
+    if (hit) return hit;
+    try {
+      const r = await fetch(req);
+      if (r && r.status === 200) {
+        const c = await caches.open(medyaMi ? MEDIA_CACHE : CORE_CACHE);
+        c.put(req, r.clone());
+      }
+      return r;
+    } catch (err) {
+      return hit || Response.error();
+    }
+  })());
 });
