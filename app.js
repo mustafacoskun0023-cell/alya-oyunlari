@@ -13,7 +13,40 @@
     dua:     window.GameDua,
     abdest:  window.GameAbdest,
     sofra:   window.GameSofra,
-    dis:     window.GameDis
+    dis:     window.GameDis,
+    // v9 — yeni oyunlar
+    kelime:   window.GameKelime,
+    hikaye:   window.GameHikaye,
+    arapharf: window.GameArapharf,
+    cami:     window.GameCami,
+    kabe:     window.GameKabe,
+    ramazan:  window.GameRamazan,
+    bayram:   window.GameBayram,
+    peygamber:window.GamePeygamber,
+    agac:     window.GameAgac,
+    duygu:    window.GameDuygu,
+    empati:   window.GameEmpati,
+    paylasma: window.GamePaylasma,
+    guzelsoz: window.GameGuzelsoz,
+    gorev:    window.GameGorev,
+    bugun:    window.GameBugun,
+    bahce:    window.GameBahce,
+    elyikama: window.GameElyikama,
+    banyo:    window.GameBanyo,
+    toplan:   window.GameToplan,
+    rutin:    window.GameRutin,
+    saglik:   window.GameSaglik,
+    giyinme:  window.GameGiyinme,
+    giydirme: window.GameGiydirme,
+    kombin:   window.GameKombin,
+    renkuyum: window.GameRenkuyum,
+    moda:     window.GameModa,
+    boyama:   window.GameBoyama,
+    cizim:    window.GameCizim,
+    muzik:    window.GameMuzik,
+    ilahi:    window.GameIlahi,
+    hareket:  window.GameHareket,
+    nefes:    window.GameNefes
   };
 
   const KATEGORILER = [
@@ -24,53 +57,54 @@
     ]},
     { id: 'harf', ad: 'Harfler<br>ve Dil', emoji: '🔤', bg: '#E5FBD8', oyunlar: [
       { id: 'letters', emoji: '🔤', label: 'Harfleri<br>Öğren', bg: '#E5FBD8', ready: true },
-      { id: 'kelime',  emoji: '💬', label: 'Kelime<br>Dağarcığı', ready: false },
-      { id: 'hikaye',  emoji: '📖', label: 'Hikaye<br>Dinle',     ready: false }
+      { id: 'kelime',  emoji: '💬', label: 'Kelime<br>Dağarcığı', ready: true },
+      { id: 'hikaye',  emoji: '📖', label: 'Hikaye<br>Dinle',     ready: true }
     ]},
     { id: 'dini', ad: 'Dini<br>Eğitim', emoji: '🕌', bg: '#E8E2FF', oyunlar: [
       { id: 'dua',       emoji: '🤲', label: 'Dua<br>Eşleştirme',  bg: '#E8E2FF', ready: true },
       { id: 'abdest',    emoji: '💧', label: 'Abdest<br>Puzzle',   bg: '#D9F3FF', ready: true },
-      { id: 'arapharf',  emoji: '📿', label: 'Arap<br>Harfleri',       ready: false },
-      { id: 'cami',      emoji: '🕌', label: "Cami'yi<br>Bul",         ready: false },
-      { id: 'kabe',      emoji: '🕋', label: 'Minik Kâbe<br>Yolculuğu',ready: false },
-      { id: 'ramazan',   emoji: '🌙', label: "Ramazan'ı<br>Keşfet",    ready: false },
-      { id: 'bayram',    emoji: '🎁', label: 'Bayram<br>Hazırlığı',    ready: false },
-      { id: 'peygamber', emoji: '📜', label: 'Peygamber<br>Hikayeleri',ready: false },
-      { id: 'agac',      emoji: '🌳', label: 'İyilik<br>Ağacı',        ready: false }
+      { id: 'arapharf',  emoji: '📿', label: 'Arap<br>Harfleri',       ready: true },
+      { id: 'cami',      emoji: '🕌', label: "Cami'yi<br>Bul",         ready: true },
+      { id: 'kabe',      emoji: '🕋', label: 'Minik Kâbe<br>Yolculuğu',ready: true },
+      { id: 'ramazan',   emoji: '🌙', label: "Ramazan'ı<br>Keşfet",    ready: true },
+      { id: 'bayram',    emoji: '🎁', label: 'Bayram<br>Hazırlığı',    ready: true },
+      { id: 'peygamber', emoji: '📜', label: 'Peygamber<br>Hikayeleri',ready: true },
+      { id: 'agac',      emoji: '🌳', label: 'İyilik<br>Ağacı',        ready: true }
     ]},
     { id: 'ahlak', ad: 'Ahlak ve<br>Arkadaşlık', emoji: '💗', bg: '#FFE0EF', oyunlar: [
-      { id: 'duygu',    emoji: '😊', label: 'Duyguları<br>Tanı',      ready: false },
-      { id: 'empati',   emoji: '🤝', label: 'Empati<br>Oyunu',        ready: false },
-      { id: 'paylasma', emoji: '🎈', label: 'Paylaşma<br>Zamanı',     ready: false },
-      { id: 'guzelsoz', emoji: '💌', label: 'Güzel<br>Sözler',        ready: false },
-      { id: 'gorev',    emoji: '⭐', label: 'Arkadaşlık<br>Görevleri',ready: false },
-      { id: 'bugun',    emoji: '🌟', label: 'Bugünün<br>İyiliği',     ready: false },
-      { id: 'bahce',    emoji: '🌷', label: 'Dostluk<br>Bahçesi',     ready: false }
+      { id: 'duygu',    emoji: '😊', label: 'Duyguları<br>Tanı',      ready: true },
+      { id: 'empati',   emoji: '🤝', label: 'Empati<br>Oyunu',        ready: true },
+      { id: 'paylasma', emoji: '🎈', label: 'Paylaşma<br>Zamanı',     ready: true },
+      { id: 'guzelsoz', emoji: '💌', label: 'Güzel<br>Sözler',        ready: true },
+      { id: 'gorev',    emoji: '⭐', label: 'Arkadaşlık<br>Görevleri',ready: true },
+      { id: 'bugun',    emoji: '🌟', label: 'Bugünün<br>İyiliği',     ready: true },
+      { id: 'bahce',    emoji: '🌷', label: 'Dostluk<br>Bahçesi',     ready: true }
     ]},
     { id: 'temizlik', ad: 'Temizlik<br>ve Görgü', emoji: '🧼', bg: '#DDF4FF', oyunlar: [
       { id: 'sofra',    emoji: '🍽️', label: 'Sofra<br>Adabı',      bg: '#FFF0DC', ready: true },
       { id: 'dis',      emoji: '🪥', label: 'Diş<br>Fırçalama',    bg: '#DDF4FF', ready: true },
-      { id: 'elyikama', emoji: '🧼', label: 'El<br>Yıkama',        ready: false },
-      { id: 'banyo',    emoji: '🛁', label: 'Banyo<br>Zamanı',     ready: false },
-      { id: 'toplan',   emoji: '🧺', label: 'Toplanma<br>Vakti',   ready: false },
-      { id: 'rutin',    emoji: '⏰', label: 'Günlük<br>Rutinim',   ready: false },
-      { id: 'saglik',   emoji: '🤧', label: 'Hapşırma<br>Adabı',   ready: false },
-      { id: 'giyinme',  emoji: '👟', label: 'Giyinme<br>ve Düzen', ready: false }
+      { id: 'elyikama', emoji: '🧼', label: 'El<br>Yıkama',        ready: true },
+      { id: 'banyo',    emoji: '🛁', label: 'Banyo<br>Zamanı',     ready: true },
+      { id: 'toplan',   emoji: '🧺', label: 'Toplanma<br>Vakti',   ready: true },
+      { id: 'rutin',    emoji: '⏰', label: 'Günlük<br>Rutinim',   ready: true },
+      { id: 'saglik',   emoji: '🤧', label: 'Hapşırma<br>Adabı',   ready: true },
+      { id: 'giyinme',  emoji: '👟', label: 'Giyinme<br>ve Düzen', ready: true }
     ]},
     { id: 'moda', ad: 'Moda<br>ve Stil', emoji: '👗', bg: '#FFE4F1', oyunlar: [
-      { id: 'moda',     emoji: '👗', label: 'Moda<br>Atölyesi', ready: false },
-      { id: 'kombin',   emoji: '👜', label: 'Kombin<br>Oyunu',  ready: false },
-      { id: 'renkuyum', emoji: '🎀', label: 'Renk<br>Uyumu',    ready: false }
+      { id: 'giydirme', emoji: '🧕', label: 'Mina’yı<br>Giydir', bg: '#FFE4F1', ready: true },
+      { id: 'moda',     emoji: '👗', label: 'Moda<br>Atölyesi', ready: true },
+      { id: 'kombin',   emoji: '👜', label: 'Kombin<br>Oyunu',  ready: true },
+      { id: 'renkuyum', emoji: '🎀', label: 'Renk<br>Uyumu',    ready: true }
     ]},
     { id: 'yaratici', ad: 'Yaratıcılık', emoji: '🖍️', bg: '#FFF3C4', oyunlar: [
-      { id: 'boyama', emoji: '🖍️', label: 'Boyama<br>Kitabı',   ready: false },
-      { id: 'cizim',  emoji: '✏️', label: 'Serbest<br>Çizim',   ready: false },
-      { id: 'muzik',  emoji: '🥁', label: 'Müzik<br>ve Ritim',  ready: false },
-      { id: 'ilahi',  emoji: '🎶', label: 'İlahi ve<br>Şarkılar',ready: false }
+      { id: 'boyama', emoji: '🖍️', label: 'Boyama<br>Kitabı',   ready: true },
+      { id: 'cizim',  emoji: '✏️', label: 'Serbest<br>Çizim',   ready: true },
+      { id: 'muzik',  emoji: '🥁', label: 'Müzik<br>ve Ritim',  ready: true },
+      { id: 'ilahi',  emoji: '🎶', label: 'İlahi ve<br>Şarkılar',ready: true }
     ]},
     { id: 'hareket', ad: 'Hareket', emoji: '🥋', bg: '#DFF6EA', oyunlar: [
-      { id: 'hareket', emoji: '🥋', label: 'Hareket<br>Oyunu',  ready: false },
-      { id: 'nefes',   emoji: '🌬️', label: 'Nefes<br>Egzersizi', ready: false }
+      { id: 'hareket', emoji: '🥋', label: 'Hareket<br>Oyunu',  ready: true },
+      { id: 'nefes',   emoji: '🌬️', label: 'Nefes<br>Egzersizi', ready: true }
     ]}
   ];
 
@@ -302,6 +336,38 @@
     setTimeout(nextQuestion, 1400);
   }
 
+  /* ---------- Seçenek kartı: DİNLE + SEÇ ----------
+     Alya okuma bilmiyor. Kartın büyük kısmına dokununca kart ne
+     olduğunu söylüyor (seçmiyor). Seçmek için alttaki yeşil
+     "Seç" şeridine dokunuyor. Böylece istediği kadar dinleyip
+     kararını kendi veriyor; sesler birbirine girmiyor.        */
+  function kartYap(o, secildi) {
+    const b = document.createElement('div');
+    b.className = 'opt';
+    b.innerHTML =
+      `<button class="opt-dinle" type="button">${o.html}</button>` +
+      `<button class="opt-sec" type="button"><span class="sec-ikon">✓</span></button>` +
+      `<span class="opt-check">✅</span>`;
+    b._opt = o;
+    b.querySelector('.opt-dinle').addEventListener('click', () => kartDinle(b, o));
+    b.querySelector('.opt-sec').addEventListener('click', () => { Snd.sfx.tap(); secildi(); });
+    return b;
+  }
+  function kartBul(o) {
+    return [...optionsArea.children].find(c => c._opt === o);
+  }
+  function kartDinle(b, o) {
+    if (locked) return;
+    [...optionsArea.children].forEach(c => c.classList.remove('tanit'));
+    b.classList.add('tanit');
+    clearTimeout(b._tt);
+    b._tt = setTimeout(() => b.classList.remove('tanit'), 1200);
+    if (o.ses) Snd.say(o.ses);
+    else if (o.dinleSes) Snd.say(o.dinleSes);
+    else Snd.sfx.tap();
+    Snd.duck(1600);
+  }
+
   function nextQuestion() {
     if (qi >= G.total) return finish();
     q = G.question(qi);
@@ -315,11 +381,7 @@
     optionsArea.style.gridTemplateColumns = 'repeat(' + (q.cols || 3) + ',1fr)';
     optionsArea.innerHTML = '';
     q.options.forEach(o => {
-      const b = document.createElement('button');
-      b.className = 'opt';
-      b.innerHTML = o.html + '<span class="opt-check">✅</span>';
-      b.addEventListener('click', () => answer(b, o));
-      optionsArea.appendChild(b);
+      optionsArea.appendChild(kartYap(o, () => answer(kartBul(o), o)));
     });
 
     sayQuestion();
@@ -341,41 +403,16 @@
   function tanitDur() {
     tanitTimer.forEach(clearTimeout);
     tanitTimer = [];
-    [...optionsArea.children].forEach(b => b.classList.remove('tanit'));
-  }
-
-  function tanitKartlari(bas) {
-    tanitDur();
-    if (!q || !q.options || !q.options.some(o => o.ses)) return;
-    const btns = [...optionsArea.children];
-    let t = bas;
-    q.options.forEach((o, i) => {
-      if (!o.ses) return;
-      const b = btns[i];
-      const an = t;
-      tanitTimer.push(setTimeout(() => {
-        if (locked) return;
-        b.classList.add('tanit');
-        Snd.say(o.ses, { keep: an > bas });
-        tanitTimer.push(setTimeout(() => b.classList.remove('tanit'), 950));
-      }, t));
-      // uzun sözler için biraz daha fazla nefes payı
-      t += 1150 + Math.min((o.ses.text || '').length * 45, 900);
-    });
-    Snd.duck(t + 300);
+    [...optionsArea.children].forEach(b => { clearTimeout(b._tt); b.classList.remove('tanit'); });
   }
 
   function sayQuestion() {
     tanitDur();
     Snd.duck(2800);
     Snd.say(q.say);
-    let bas = 1500;
     if (q.sayFollow) {
-      const gec = q.sayFollow.delay || 900;
-      Snd.say(q.sayFollow, { delay: gec, keep: true });
-      bas = gec + 1700;
+      Snd.say(q.sayFollow, { delay: q.sayFollow.delay || 900, keep: true });
     }
-    tanitKartlari(bas);
   }
 
   function answer(btn, opt) {
