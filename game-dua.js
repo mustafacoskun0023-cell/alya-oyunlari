@@ -2,17 +2,17 @@
 window.GameDua = (function () {
   // Kısa, 4 yaş için tanıdık sözler
   const SOZLER = {
-    bismillah:    { id: 'soz-bismillah',    metin: 'Bismillah',
+    bismillah:    { id: 'soz-bismillah',    metin: 'Bismillah', e: '⭐', renk: '#8B5CF6',
                     anlam: 'Bismillah, Allah’ın adıyla başlıyorum demektir.' },
-    elhamdulillah:{ id: 'soz-elhamdulillah',metin: 'Elhamdülillah',
+    elhamdulillah:{ id: 'soz-elhamdulillah',metin: 'Elhamdülillah', e: '💚', renk: '#22C55E',
                     anlam: 'Elhamdülillah, Allah’a çok şükür demektir.' },
-    masallah:     { id: 'soz-masallah',     metin: 'Maşallah',
+    masallah:     { id: 'soz-masallah',     metin: 'Maşallah', e: '✨', renk: '#FF8A00',
                     anlam: 'Maşallah, Allah nazardan korusun demektir.' },
-    insallah:     { id: 'soz-insallah',     metin: 'İnşallah',
+    insallah:     { id: 'soz-insallah',     metin: 'İnşallah', e: '🌙', renk: '#2E86FF',
                     anlam: 'İnşallah, Allah izin verirse demektir.' },
-    selam:        { id: 'soz-selam',        metin: 'Selamünaleyküm',
+    selam:        { id: 'soz-selam',        metin: 'Selamünaleyküm', e: '👋', renk: '#12C2C2',
                     anlam: 'Selamünaleyküm, selam ve huzur olsun demektir.' },
-    razi:         { id: 'soz-razi',         metin: 'Allah razı olsun',
+    razi:         { id: 'soz-razi',         metin: 'Allah razı olsun', e: '💐', renk: '#FF5FA2',
                     anlam: 'Allah razı olsun, teşekkür ederim demektir.' }
   };
 
@@ -76,9 +76,15 @@ window.GameDua = (function () {
         </div>`,
       say: { id: d.id, text: d.soru },
       options: secenekler.map(o => ({
-        html: `<span class="soz-karti" style="color:${renk}">${SOZLER[o.k].metin}</span>`,
+        html: `<span class="soz-karti" style="--sc:${SOZLER[o.k].renk}">
+                 <span class="soz-e">${SOZLER[o.k].e}</span>
+                 <span class="soz-t">${SOZLER[o.k].metin}</span>
+               </span>`,
         correct: o.correct,
-        onCorrect: o.correct ? SOZLER[d.dogru] : null
+        // Alya okuma bilmiyor: her kart kendi sözünü söyler
+        ses: { id: SOZLER[o.k].id, text: SOZLER[o.k].metin },
+        onCorrect: o.correct
+          ? { id: SOZLER[d.dogru].id, text: SOZLER[d.dogru].metin } : null
       })),
       // Öğretici kısım: sözün ne demek olduğunu anlatır
       aciklama: { id: 'anlam-' + d.dogru, text: SOZLER[d.dogru].anlam },

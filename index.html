@@ -45,9 +45,20 @@
       <span class="icon-note">♪</span>
       <span class="icon-slash"></span>
     </button>
+    <button id="ayarBtn" class="icon-btn ayar" aria-label="Anne-baba ayarları">⚙</button>
   </header>
 
   <main class="menu-grid" id="menuGrid"></main>
+
+  <!-- Anne-baba paneli: ⚙ düğmesine 2 saniye basılı tutunca açılır -->
+  <div id="ayarPanel" class="ayar-panel" hidden>
+    <div class="ayar-kutu">
+      <h3>Anne-Baba</h3>
+      <div id="ayarOzet" class="ayar-ozet"></div>
+      <button id="sifirlaBtn" class="pill-btn red">Tüm ilerlemeyi sıfırla</button>
+      <button id="ayarKapat" class="pill-btn blue">Kapat</button>
+    </div>
+  </div>
 </div>
 
 <!-- ============ OYUN EKRANI ============ -->

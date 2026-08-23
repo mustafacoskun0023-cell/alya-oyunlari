@@ -99,6 +99,23 @@
   let totalStars = load('alya_stars', 0);
   let musicPref = load('alya_music', true);
 
+  /* ---------- oyun ilerlemesi (tablet kapansa da kalır) ----------
+     { oyunId: { oynandi: 3, enIyi: 2, sonKez: '2026-08-23' } }        */
+  let ilerleme = load('alya_ilerleme', {});
+  function ilerlemeKaydet(oyunId, yildiz) {
+    const k = ilerleme[oyunId] || { oynandi: 0, enIyi: 0 };
+    k.oynandi++;
+    if (yildiz > k.enIyi) k.enIyi = yildiz;
+    k.sonKez = new Date().toISOString().slice(0, 10);
+    ilerleme[oyunId] = k;
+    save('alya_ilerleme', ilerleme);
+  }
+  function ilerlemeSifirla() {
+    ilerleme = {}; totalStars = 0;
+    save('alya_ilerleme', ilerleme); save('alya_stars', 0);
+    renderStars(); buildMenu();
+  }
+
   function show(name) {
     Object.keys(screens).forEach(k => screens[k].classList.toggle('active', k === name));
   }
@@ -139,7 +156,8 @@
     b.innerHTML = gorselli(o.gorsel, o.emoji, 'kart-gorsel') +
                   `<span class="label">${o.label}</span>` +
                   (o.ready === false ? '<span class="soon-tag">YAKINDA</span>' : '') +
-                  (o.rozet ? `<span class="card-badge">${o.rozet}</span>` : '');
+                  (o.rozet ? `<span class="card-badge">${o.rozet}</span>` : '') +
+                  (o.yildiz ? `<span class="kart-yildiz">${'⭐'.repeat(o.yildiz)}</span>` : '');
     b.addEventListener('click', tiklama);
     return b;
   }
@@ -150,14 +168,30 @@
     brandTitle.innerHTML = "Alya'nın Oyunları";
     const grid = $('#menuGrid');
     grid.innerHTML = '';
-    KATEGORILER.forEach(k => {
-      const hazir = k.oyunlar.filter(o => o.ready).length;
+    // Sadece oynanabilir oyunu olan kategoriler görünür — Alya
+    // dokunup açılmayan karta takılmasın.
+    KATEGORILER.filter(k => k.oyunlar.some(o => o.ready)).forEach(k => {
+      const hazir = k.oyunlar.filter(o => o.ready);
+      const bitmis = hazir.filter(o => ilerleme[o.id]).length;
       grid.appendChild(kart(
         { emoji: k.emoji, gorsel: 'kategori-' + k.id, label: k.ad, bg: k.bg, ready: true,
-          rozet: hazir ? hazir + ' oyun' : 'yakında' },
+          rozet: bitmis ? bitmis + '/' + hazir.length + ' ✓' : hazir.length + ' oyun' },
         () => { Snd.sfx.tap(); openCategory(k.id); }
       ));
     });
+    izgaraAyarla(grid);
+  }
+
+  /* Az kart varsa ızgara ortalansın ve kartlar büyüsün. */
+  function izgaraAyarla(grid) {
+    const n = grid.children.length;
+    const dikey = innerHeight > innerWidth;
+    const sut = dikey ? Math.min(n, 2) : Math.min(n, n <= 4 ? n : 4);
+    grid.style.gridTemplateColumns = 'repeat(' + Math.max(sut, 1) + ',minmax(0,1fr))';
+    grid.style.justifyContent = 'center';
+    // flex içinde margin:auto stretch'i bozuyor — genişliği açıkça veriyoruz
+    grid.style.width = sut <= 2 ? 'min(100%,720px)' : '100%';
+    grid.style.marginInline = 'auto';
   }
 
   function openCategory(id) {
@@ -168,19 +202,48 @@
     brandTitle.innerHTML = k.ad.replace(/<br>/g, ' ');
     const grid = $('#menuGrid');
     grid.innerHTML = '';
-    k.oyunlar.forEach(o => {
+    // Hazır olmayan oyunlar menüde hiç görünmüyor; hepsi serbestçe seçilebilir.
+    k.oyunlar.filter(o => o.ready).forEach(o => {
       o.gorsel = 'oyun-' + o.id;
-      grid.appendChild(kart(o, () => {
-        if (o.ready) { Snd.sfx.tap(); startGame(o.id); }
-        else {
-          Snd.sfx.whoosh();
-          Snd.say({ id: 'sys-yakinda', text: 'Bu oyun çok yakında geliyor!' });
-        }
-      }));
+      o.yildiz = (ilerleme[o.id] || {}).enIyi || 0;
+      grid.appendChild(kart(o, () => { Snd.sfx.tap(); startGame(o.id); }));
     });
+    izgaraAyarla(grid);
   }
 
   menuBackBtn.addEventListener('click', () => { Snd.sfx.tap(); Snd.stopVoice(); buildMenu(); });
+
+  /* ---------- Anne-baba paneli ----------
+     ⚙ düğmesine 2 saniye basılı tutmak gerekiyor; 4 yaşındaki bir
+     çocuk kazayla açıp ilerlemeyi silemesin diye.                  */
+  (function ayarKur() {
+    const btn = $('#ayarBtn'), panel = $('#ayarPanel'), ozet = $('#ayarOzet');
+    let zaman = null;
+    function ac() {
+      const hazir = [];
+      KATEGORILER.forEach(k => k.oyunlar.forEach(o => { if (o.ready) hazir.push(o); }));
+      const satir = hazir.map(o => {
+        const k = ilerleme[o.id];
+        const ad = o.label.replace(/<br>/g, ' ');
+        return k
+          ? `<div class="ozet-satir"><span>${ad}</span><b>${'⭐'.repeat(k.enIyi)} · ${k.oynandi} kez · ${k.sonKez}</b></div>`
+          : `<div class="ozet-satir bos"><span>${ad}</span><b>henüz oynanmadı</b></div>`;
+      }).join('');
+      ozet.innerHTML = `<div class="ozet-baslik">Toplam ⭐ ${totalStars}</div>` + satir;
+      panel.hidden = false;
+    }
+    function bas() { clearTimeout(zaman); zaman = setTimeout(() => { Snd.sfx.tap(); ac(); }, 2000); btn.classList.add('basili'); }
+    function birak() { clearTimeout(zaman); btn.classList.remove('basili'); }
+    btn.addEventListener('pointerdown', bas);
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(e => btn.addEventListener(e, birak));
+    $('#ayarKapat').addEventListener('click', () => { panel.hidden = true; });
+    panel.addEventListener('click', e => { if (e.target === panel) panel.hidden = true; });
+    $('#sifirlaBtn').addEventListener('click', function () {
+      if (this.dataset.onay) { ilerlemeSifirla(); panel.hidden = true; delete this.dataset.onay; this.textContent = 'Tüm ilerlemeyi sıfırla'; return; }
+      this.dataset.onay = '1'; this.textContent = 'Emin misin? Tekrar bas';
+      setTimeout(() => { delete this.dataset.onay; this.textContent = 'Tüm ilerlemeyi sıfırla'; }, 5000);
+    });
+  })();
 
   const musicBtn = $('#musicBtn');
   function syncMusicBtn() { musicBtn.setAttribute('aria-pressed', Snd.musicOn ? 'true' : 'false'); }
@@ -214,6 +277,7 @@
   function startGame(id) {
     G = GAMES[id];
     if (!G) return;
+    tanitDur();
     qi = 0; correctFirst = 0;
     show('game');
     const kat = oyunKategorisi(id);
@@ -263,19 +327,60 @@
     if (qi + 1 < G.total) {
       try {
         const nx = G.question(qi + 1);
-        Snd.preload([nx.say && nx.say.id, nx.sayFollow && nx.sayFollow.id]);
+        Snd.preload([nx.say && nx.say.id, nx.sayFollow && nx.sayFollow.id]
+          .concat((nx.options || []).map(o => o.ses && o.ses.id)));
       } catch (e) {}
     }
   }
 
+  /* ---------- kartların kendini tanıtması ----------
+     Alya okuma yazma bilmiyor. Soru sorulduktan sonra her kart
+     sırayla parlar ve kendi adını söyler; çocuk hangisinin ne
+     olduğunu duyarak öğrenir. İstediği an dokunup kesebilir.     */
+  let tanitTimer = [];
+  function tanitDur() {
+    tanitTimer.forEach(clearTimeout);
+    tanitTimer = [];
+    [...optionsArea.children].forEach(b => b.classList.remove('tanit'));
+  }
+
+  function tanitKartlari(bas) {
+    tanitDur();
+    if (!q || !q.options || !q.options.some(o => o.ses)) return;
+    const btns = [...optionsArea.children];
+    let t = bas;
+    q.options.forEach((o, i) => {
+      if (!o.ses) return;
+      const b = btns[i];
+      const an = t;
+      tanitTimer.push(setTimeout(() => {
+        if (locked) return;
+        b.classList.add('tanit');
+        Snd.say(o.ses, { keep: an > bas });
+        tanitTimer.push(setTimeout(() => b.classList.remove('tanit'), 950));
+      }, t));
+      // uzun sözler için biraz daha fazla nefes payı
+      t += 1150 + Math.min((o.ses.text || '').length * 45, 900);
+    });
+    Snd.duck(t + 300);
+  }
+
   function sayQuestion() {
+    tanitDur();
     Snd.duck(2800);
     Snd.say(q.say);
-    if (q.sayFollow) Snd.say(q.sayFollow, { delay: q.sayFollow.delay || 900, keep: true });
+    let bas = 1500;
+    if (q.sayFollow) {
+      const gec = q.sayFollow.delay || 900;
+      Snd.say(q.sayFollow, { delay: gec, keep: true });
+      bas = gec + 1700;
+    }
+    tanitKartlari(bas);
   }
 
   function answer(btn, opt) {
     if (locked) return;
+    tanitDur();          // çocuk seçtiyse tanıtımı kes
     if (opt.correct) {
       locked = true;
       btn.classList.add('correct');
@@ -311,7 +416,9 @@
           promptArea.contains(kutu) && kutu.classList.add('gorun');
         }, q.onCorrectFx ? gec - 200 : 30);
         Snd.say(q.aciklama, { delay: gec, keep: true });
-        bekle = Math.max(bekle, gec + 4200);
+        // klip uzunluğu metne göre değişiyor — kısa cümlede bekletme, uzunda kesme
+        const okuma = 1100 + (q.aciklama.text || '').length * 82;
+        bekle = Math.max(bekle, gec + Math.min(okuma, 7000));
       }
       Snd.duck(Math.max(2200, bekle - 150));
       if (firstTry) correctFirst++;
@@ -330,6 +437,7 @@
 
   function odul(stars, altYazi) {
     totalStars += stars; save('alya_stars', totalStars); renderStars();
+    if (G && G.id) ilerlemeKaydet(G.id, stars);
     $('#rewardTitle').textContent = 'Tebrikler Alya!';
     $('#rewardScore').textContent = altYazi;
     const row = $('#starsRow');
@@ -357,6 +465,7 @@
 
   /* ---------- butonlar ---------- */
   function eveDon() {
+    tanitDur();
     Snd.stopVoice(); Snd.sfx.tap(); FX.clear();
     if (acikKategori) openCategory(acikKategori);
     show('menu');

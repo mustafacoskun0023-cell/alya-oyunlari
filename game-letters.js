@@ -66,7 +66,8 @@ window.GameLetters = (function () {
         sayFollow: { id: 'sys-harf-ayni', text: 'Aynı harfi bul!', delay: 850 },
         options: secenekler.map(o => ({
           html: `<span class="opt-letter">${o.x.h}</span>`,
-          correct: o.correct
+          correct: o.correct,
+          ses: { id: 'harf-' + o.x.kod, text: o.x.h }
         })),
         cols: 3
       };
@@ -94,6 +95,7 @@ window.GameLetters = (function () {
       options: secenekler.map(o => ({
         html: `<span class="opt-pic">${o.x.e}</span><span class="opt-cap">${o.x.kel}</span>`,
         correct: o.correct,
+        ses: { id: 'kelime-' + o.x.kkod, text: o.x.kel },
         // doğru cevapta kelimeyi söyle
         onCorrect: o.correct ? { id: 'kelime-' + t.kkod, text: t.kel + '!' } : null
       })),

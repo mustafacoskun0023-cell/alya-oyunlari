@@ -98,7 +98,8 @@ window.GameSofra = (function () {
       options: secenekler.map(o => ({
         html: `<span class="davranis"><span class="davranis-e">${o.s.e}</span>
                  <span class="davranis-t">${o.s.t}</span></span>`,
-        correct: o.correct
+        correct: o.correct,
+        ses: { id: d.id + (o.correct ? '-d' : '-y'), text: o.s.t }
       })),
       cols: 2
     };

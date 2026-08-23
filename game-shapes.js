@@ -112,7 +112,11 @@ window.GameShapes = (function () {
       aciklama: (type === 'shape' || type === 'both')
         ? { id: 'not-sekil-' + tShape.id, text: tShape.not }
         : { id: 'not-renk-' + tColor.id, text: RENK_NOT[tColor.id] },
-      options: opts.map(o => ({ html: shapeSVG(o.s, o.c), correct: o.correct })),
+      // Alya okuma bilmiyor: her kart kendini "kırmızı kalp" diye tanıtır
+      options: opts.map(o => ({
+        html: shapeSVG(o.s, o.c), correct: o.correct,
+        ses: { id: 'rs-' + o.c.id + '-' + o.s.id, text: o.c.n + ' ' + o.s.n }
+      })),
       cols: 3
     };
   }
