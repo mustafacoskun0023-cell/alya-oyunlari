@@ -589,9 +589,9 @@ body::before{
 }
 .giy-sahne.kutlama{animation:popCorrect .6s ease}
 .giy-taban{
-  position:absolute;top:2%;left:50%;transform:translateX(-50%);
-  height:96%;width:auto;max-width:96%;object-fit:contain;z-index:1;
-  filter:drop-shadow(0 6px 8px rgba(43,27,84,.2));
+  position:absolute;top:3%;left:50%;transform:translateX(-50%);
+  height:94%;width:auto;max-width:90%;object-fit:contain;z-index:1;
+  filter:drop-shadow(0 8px 12px rgba(43,27,84,.34));
 }
 .giy-taban.yedek-e{
   display:grid;place-items:center;font-size:min(60vh,44vw);height:96%;width:100%;
@@ -784,3 +784,24 @@ body::before{
 .nefes-noktalar{display:flex;gap:9px}
 .nn{width:clamp(10px,1.6vh,16px);aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.4)}
 .nn.dolu{background:#FFC800;box-shadow:0 0 0 3px rgba(255,200,0,.3)}
+
+/* ===== Giydirme: karakter seçimi ve mekan ===== */
+.options-area.kr-secim{align-content:center;gap:clamp(8px,2vw,20px)}
+.kr-kart{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  gap:clamp(4px,1vh,10px);background:#fff;border-radius:var(--card-r);
+  box-shadow:var(--shadow);padding:clamp(8px,1.6vh,16px) 6px;
+  min-height:clamp(120px,26vh,260px);border:4px solid transparent;
+}
+.kr-kart:active{transform:scale(.95)}
+.kr-img{
+  flex:1 1 auto;min-height:0;width:auto;max-width:92%;object-fit:contain;
+  filter:drop-shadow(0 5px 6px rgba(43,27,84,.22));
+}
+.kr-img.yedek-e{display:grid;place-items:center;font-size:clamp(44px,12vh,110px)}
+.kr-ad{font-size:clamp(13px,2.4vh,24px);color:var(--ink);font-weight:900}
+
+.giy-mekan{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;z-index:0;opacity:.92;
+}
