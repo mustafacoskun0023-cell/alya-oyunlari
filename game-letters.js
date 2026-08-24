@@ -1,111 +1,159 @@
-/* ===== Oyun 3: Harf Tanıma (Türkçe alfabe, büyük harfler) ===== */
+/* ===== Harfleri Öğren — Endless Alphabet modeli =====
+   1) Kelimenin harfleri karışık dizilir, silüetleri boş durur.
+   2) Çocuk harfi tutup silüetteki yerine sürükler.
+      SÜRÜKLERKEN harf kendi SESİNİ tekrar tekrar söyler ("mmm, mmm").
+      Bırakınca susar — ses çocuğun parmağına bağlı, nedensellik.
+   3) Silüet doğru yeri gösterdiği için yanlış yapmak imkânsız;
+      yanlış yere bırakılan harf sessizce havuzda kalır. Ceza yok.
+   4) Kelime tamamlanınca anlamı canlandıran animasyon oynar
+      ve kelime sesli okunur.                                      */
 window.GameLetters = (function () {
-  // Ğ yok: Türkçe'de hiçbir kelime Ğ ile başlamaz
-  const A = [
-    { h:'A', kod:'a',  kel:'Aslan',  kkod:'aslan',  e:'🦁' },
-    { h:'B', kod:'b',  kel:'Balık',  kkod:'balik',  e:'🐟' },
-    { h:'C', kod:'c',  kel:'Civciv', kkod:'civciv', e:'🐥' },
-    { h:'Ç', kod:'cc', kel:'Çilek',  kkod:'cilek',  e:'🍓' },
-    { h:'D', kod:'d',  kel:'Davul',  kkod:'davul',  e:'🥁' },
-    { h:'E', kod:'e',  kel:'Elma',   kkod:'elma',   e:'🍎' },
-    { h:'F', kod:'f',  kel:'Fil',    kkod:'fil',    e:'🐘' },
-    { h:'G', kod:'g',  kel:'Gül',    kkod:'gul',    e:'🌹' },
-    { h:'H', kod:'h',  kel:'Horoz',  kkod:'horoz',  e:'🐓' },
-    { h:'I', kod:'ii', kel:'Işık',   kkod:'isik',   e:'💡' },
-    { h:'İ', kod:'i',  kel:'İnek',   kkod:'inek',   e:'🐄' },
-    { h:'J', kod:'j',  kel:'Jaguar', kkod:'jaguar', e:'🐆' },
-    { h:'K', kod:'k',  kel:'Kedi',   kkod:'kedi',   e:'🐱' },
-    { h:'L', kod:'l',  kel:'Limon',  kkod:'limon',  e:'🍋' },
-    { h:'M', kod:'m',  kel:'Muz',    kkod:'muz',    e:'🍌' },
-    { h:'N', kod:'n',  kel:'Nota',   kkod:'nota',   e:'🎵' },
-    { h:'O', kod:'o',  kel:'Otobüs', kkod:'otobus', e:'🚌' },
-    { h:'Ö', kod:'oo', kel:'Ördek',  kkod:'ordek',  e:'🦆' },
-    { h:'P', kod:'p',  kel:'Pasta',  kkod:'pasta',  e:'🎂' },
-    { h:'R', kod:'r',  kel:'Robot',  kkod:'robot',  e:'🤖' },
-    { h:'S', kod:'s',  kel:'Süt',    kkod:'sut',    e:'🥛' },
-    { h:'Ş', kod:'ss', kel:'Şapka',  kkod:'sapka',  e:'🎩' },
-    { h:'T', kod:'t',  kel:'Top',    kkod:'top',    e:'⚽' },
-    { h:'U', kod:'u',  kel:'Uçak',   kkod:'ucak',   e:'✈️' },
-    { h:'Ü', kod:'uu', kel:'Üzüm',   kkod:'uzum',   e:'🍇' },
-    { h:'V', kod:'v',  kel:'Vazo',   kkod:'vazo',   e:'🏺' },
-    { h:'Y', kod:'y',  kel:'Yıldız', kkod:'yildiz', e:'⭐' },
-    { h:'Z', kod:'z',  kel:'Zürafa', kkod:'zurafa', e:'🦒' }
+
+  const KELIMELER = [
+    { kel: 'ARI',   kod: 'ari',   e: '🐝', anim: 'uc',    ders: 'Arı çiçekten çiçeğe uçar, bal yapar.' },
+    { kel: 'ELMA',  kod: 'elma',  e: '🍎', anim: 'zipla', ders: 'Elma kırmızıdır ve çok faydalıdır.' },
+    { kel: 'KEDİ',  kod: 'kedi',  e: '🐱', anim: 'salla', ders: 'Kedi miyavlar, tüyleri yumuşacıktır.' },
+    { kel: 'BALIK', kod: 'balik', e: '🐟', anim: 'yuz',   ders: 'Balık suda yüzer, hiç durmadan.' },
+    { kel: 'GÜL',   kod: 'gul',   e: '🌹', anim: 'buyu',  ders: 'Gül mis gibi kokar, dikenleri vardır.' },
+    { kel: 'TOP',   kod: 'top',   e: '⚽', anim: 'zipla', ders: 'Top yuvarlaktır, zıplar ve yuvarlanır.' },
+    { kel: 'MUZ',   kod: 'muz',   e: '🍌', anim: 'salla', ders: 'Muz sarıdır, bize güç verir.' },
+    { kel: 'FİL',   kod: 'fil',   e: '🐘', anim: 'buyu',  ders: 'Fil çok büyüktür, hortumuyla su içer.' },
+    { kel: 'NAR',   kod: 'nar',   e: '🥭', anim: 'zipla', ders: 'Narın içi kırmızı tanelerle doludur.' },
+    { kel: 'SÜT',   kod: 'sut',   e: '🥛', anim: 'buyu',  ders: 'Süt kemiklerimizi güçlendirir.' },
+    { kel: 'KUŞ',   kod: 'kus',   e: '🐦', anim: 'uc',    ders: 'Kuş kanatlarıyla gökyüzünde uçar.' },
+    { kel: 'AY',    kod: 'ay',    e: '🌙', anim: 'salla', ders: 'Ay geceleri gökyüzünde parlar.' }
   ];
-  const RENK = ['#FF4757','#2E86FF','#22C55E','#FF8A00','#8B5CF6','#12C2C2','#FF5FA2'];
 
-  let plan = [], order = [];
+  /* harf → kayıtlı ses klibinin kodu */
+  const KOD = { 'A':'a','B':'b','C':'c','Ç':'cc','D':'d','E':'e','F':'f','G':'g',
+    'H':'h','I':'ii','İ':'i','J':'j','K':'k','L':'l','M':'m','N':'n','O':'o',
+    'Ö':'oo','P':'p','R':'r','S':'s','Ş':'ss','T':'t','U':'u','Ü':'uu','V':'v',
+    'Y':'y','Z':'z' };
 
-  function start() {
-    // İlk 5 soru harf eşleştirme (kolay), sonrası ilk ses (zor)
-    plan = ['ayni','ayni','ayni','ayni','ayni','ses','ses','ses','ses','ses'];
-    order = U.shuffle(A);
+  const RENK = ['#FF4757', '#2E86FF', '#22C55E', '#FF8A00', '#8B5CF6', '#12C2C2', '#FF5FA2'];
+
+  const TUR = 8;
+  let ctx = null, sira = [], qi = 0, kelime = null, yerlesen = 0, sesT = null;
+
+  function mount(c) {
+    ctx = c; qi = 0;
+    sira = U.shuffle(KELIMELER).slice(0, TUR);
+    ctx.options.className = 'options-area harf';
+    ctx.options.style.gridTemplateColumns = '';
+    ctx.say({ id: 'sys-oyun-harf', text: 'Harfleri yerine koyalım!' });
+    ctx.duck(2600);
+    setTimeout(kur, 2700);
   }
 
-  function question(i) {
-    const t = order[i % order.length];
-    const tip = plan[i % plan.length];
-    const renk = RENK[i % RENK.length];
+  function kur() {
+    if (qi >= sira.length) return bitir();
+    kelime = sira[qi];
+    yerlesen = 0;
+    const harfler = kelime.kel.split('');
+    ctx.setProgress(qi, TUR);
 
-    if (tip === 'ayni') {
-      // Aynı harfi bul: 3 harf seçeneği
-      const digerleri = U.sample(A.filter(x => x.h !== t.h), 2);
-      const secenekler = U.shuffle([
-        { x: t, correct: true },
-        { x: digerleri[0], correct: false },
-        { x: digerleri[1], correct: false }
-      ]);
-      return {
-        prompt: `
-          <div class="prompt-side">
-            <div class="prompt-bubble">
-              <div class="big-letter" style="color:${renk}">${t.h}</div>
-            </div>
-            <div class="prompt-q">Aynı harfi bul!</div>
-          </div>`,
-        say: { id: 'harf-' + t.kod, text: t.h + '!' },
-        sayFollow: { id: 'sys-harf-ayni', text: 'Aynı harfi bul!', delay: 850 },
-        options: secenekler.map(o => ({
-          html: `<span class="opt-letter">${o.x.h}</span>`,
-          correct: o.correct,
-          ses: { id: 'harf-' + o.x.kod, text: o.x.h }
-        })),
-        cols: 3
-      };
-    }
+    ctx.prompt.innerHTML = `<div class="prompt-side"><div class="hf-resim" id="hfResim">${kelime.e}</div></div>`;
 
-    // İlk ses: hangi nesne bu harfle başlıyor?
-    const digerleri = U.sample(A.filter(x => x.h !== t.h), 2);
-    const secenekler = U.shuffle([
-      { x: t, correct: true },
-      { x: digerleri[0], correct: false },
-      { x: digerleri[1], correct: false }
-    ]);
-    return {
-      prompt: `
-        <div class="prompt-side">
-          <div class="prompt-bubble">
-            <div class="big-letter" style="color:${renk}">${t.h}</div>
-          </div>
-          <div class="prompt-q">Hangisi bu sesle başlıyor?</div>
-        </div>`,
-      say: { id: 'harf-' + t.kod, text: t.h + '!' },
-      sayFollow: { id: 'sys-harf-ses', text: 'Hangisi bu sesle başlıyor?', delay: 850 },
-      aciklama: { id: 'not-harf-' + t.kod,
-                  text: `${t.kel} kelimesi ${t.h} sesiyle başlar.` },
-      options: secenekler.map(o => ({
-        html: `<span class="opt-pic">${o.x.e}</span><span class="opt-cap">${o.x.kel}</span>`,
-        correct: o.correct,
-        ses: { id: 'kelime-' + o.x.kkod, text: o.x.kel },
-        // doğru cevapta kelimeyi söyle
-        onCorrect: o.correct ? { id: 'kelime-' + t.kkod, text: t.kel + '!' } : null
-      })),
-      cols: 3
-    };
+    ctx.options.innerHTML = `
+      <div class="hf-yuvalar" id="hfYuva">${
+        harfler.map((h, n) =>
+          `<span class="hf-yuva" data-n="${n}" data-h="${h}"><span class="hf-golge">${h}</span></span>`
+        ).join('')
+      }</div>
+      <div class="hf-havuz" id="hfHavuz"></div>`;
+
+    const havuz = ctx.options.querySelector('#hfHavuz');
+    U.shuffle(harfler.map((h, n) => ({ h, n }))).forEach(o => {
+      const b = document.createElement('div');
+      b.className = 'hf-harf';
+      b.style.color = RENK[o.n % RENK.length];
+      b.textContent = o.h;
+      b.dataset.h = o.h;
+      harfBagla(b, o.h);
+      havuz.appendChild(b);
+    });
+
+    ctx.duck(2400);
+    Snd.say({ id: 'kel-' + kelime.kod, text: kelime.kel });
+  }
+
+  function harfBagla(b, h) {
+    const kod = KOD[h] || 'a';
+    Surukle.bagla(b, {
+      veri: h,
+      hayaletHtml: `<span class="hf-harf hayalet" style="color:${b.style.color}">${h}</span>`,
+      tutuldu: () => {
+        Snd.say({ id: 'harf-' + kod, text: h });
+        clearInterval(sesT);
+        sesT = setInterval(() => Snd.say({ id: 'harf-' + kod, text: h }), 720);
+        ctx.duck(5000);
+      },
+      tekDokunus: () => {
+        clearInterval(sesT);
+        ctx.duck(1500);
+        Snd.say({ id: 'harf-' + kod, text: h });
+        const y = [...ctx.options.querySelectorAll('.hf-yuva')]
+          .find(v => !v.classList.contains('dolu') && v.dataset.h === h);
+        if (y) setTimeout(() => yerlestir(b, y, h), 520);
+      },
+      hedefSec: (x, y) => {
+        const t = Surukle.hedefBul(ctx.options, '.hf-yuva', x, y);
+        [...ctx.options.querySelectorAll('.hf-yuva')].forEach(v =>
+          v.classList.toggle('aktif',
+            v === t && !v.classList.contains('dolu') && v.dataset.h === h));
+      },
+      birakildi: (v, x, y) => {
+        clearInterval(sesT);
+        [...ctx.options.querySelectorAll('.hf-yuva')].forEach(k => k.classList.remove('aktif'));
+        const t = Surukle.hedefBul(ctx.options, '.hf-yuva', x, y);
+        if (t && !t.classList.contains('dolu') && t.dataset.h === h) yerlestir(b, t, h);
+      }
+    });
+  }
+
+  function yerlestir(b, yuva, h) {
+    if (yuva.classList.contains('dolu')) return;
+    yuva.classList.add('dolu');
+    yuva.innerHTML = `<span class="hf-yerlesti" style="color:${b.style.color}">${h}</span>`;
+    b.remove();
+    Snd.sfx.correct();
+    const r = yuva.getBoundingClientRect();
+    FX.confetti(18, r.left + r.width / 2, r.top + r.height / 2);
+    yerlesen++;
+    if (yerlesen >= kelime.kel.length) setTimeout(tamamlandi, 700);
+  }
+
+  function tamamlandi() {
+    const res = ctx.prompt.querySelector('#hfResim');
+    if (res) res.classList.add('anim-' + kelime.anim);
+    const yuv = ctx.options.querySelector('#hfYuva');
+    if (yuv) yuv.classList.add('tamam');
+
+    Snd.sfx.correct(); Snd.sfx.applause(); ctx.happy();
+    FX.confetti(90, innerWidth / 2, innerHeight / 3);
+
+    ctx.duck(5600);
+    Snd.say({ id: 'kel-' + kelime.kod, text: kelime.kel });
+    Snd.say({ id: 'kel-' + kelime.kod + '-ders', text: kelime.ders }, { delay: 1000, keep: true });
+
+    const balon = document.createElement('div');
+    balon.className = 'aciklama-balon gorun';
+    balon.textContent = kelime.ders;
+    ctx.prompt.appendChild(balon);
+
+    qi++;
+    ctx.setProgress(qi, TUR);
+    setTimeout(kur, Math.min(2600 + kelime.ders.length * 82, 7000));
+  }
+
+  function bitir() {
+    ctx.options.className = 'options-area';
+    ctx.finish(3, `${TUR} kelimeyi harflerinden kurdun!`);
   }
 
   return {
-    id: 'letters', title: 'Harfleri<br>Öğren', emoji: '🔤',
-    intro: { id: 'sys-oyun-harf', text: 'Hadi harfleri öğrenelim!' },
-    total: 10, start, question
+    id: 'letters', title: 'Harfleri<br>Öğren', emoji: '🔤', mode: 'custom',
+    intro: { id: 'sys-oyun-harf', text: 'Harfleri yerine koyalım!' },
+    mount
   };
 })();

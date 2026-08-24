@@ -981,3 +981,104 @@ body::before{
 .dg-nefes.basili{transform:scale(1.42)}
 .dg-halka{position:absolute;inset:8%;border:5px dashed rgba(255,255,255,.8);border-radius:50%}
 .dg-nefes-t{font-size:clamp(12px,2.1vh,20px);font-weight:900;text-align:center;padding:0 10px;z-index:1}
+
+/* ===== Rutin motoru (abdest / el yıkama / banyo) ===== */
+.options-area.rutin{
+  grid-template-columns:1fr;
+  display:grid;grid-template-rows:minmax(0,1fr) auto auto;
+  gap:clamp(6px,1.3vh,14px);overflow:hidden;
+}
+.rt-sahne{
+  position:relative;min-height:0;border-radius:var(--card-r);overflow:hidden;
+  background:linear-gradient(180deg,#EAF6FF,#F3FBFF);box-shadow:var(--shadow);
+  display:grid;place-items:center;
+}
+.rt-arka{position:absolute;inset:0;display:grid;place-items:center;opacity:.16}
+.rt-arka-e{font-size:min(50vh,50vw)}
+.rt-govde{
+  position:relative;z-index:2;display:grid;place-items:center;
+  width:min(34vh,54vw);aspect-ratio:1;border-radius:50%;
+  border:6px dashed transparent;transition:.2s;
+}
+.rt-govde.aktif{border-color:#22C55E;background:rgba(34,197,94,.14)}
+.rt-govde.yapildi{animation:popCorrect .6s ease}
+.rt-govde-e{font-size:min(26vh,40vw);line-height:1;filter:drop-shadow(0 5px 7px rgba(43,27,84,.24))}
+.rt-kopuk{position:absolute;inset:0;z-index:3;pointer-events:none}
+.rt-kopuk-e{position:absolute;font-size:clamp(18px,3.6vh,36px);animation:kopukCik .6s ease both}
+@keyframes kopukCik{0%{opacity:0;transform:scale(.3)}100%{opacity:.9;transform:scale(1)}}
+.rt-ilerleme{
+  position:absolute;left:8%;right:8%;bottom:8px;z-index:4;height:clamp(12px,2vh,20px);
+  background:rgba(255,255,255,.7);border-radius:999px;overflow:hidden;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.18);
+}
+.rt-il-dolu{height:100%;width:0;border-radius:999px;
+  background:linear-gradient(90deg,#7EC8F0,#22C55E);transition:width .12s linear}
+.rt-yol{display:flex;justify-content:center;gap:clamp(4px,1vw,10px);flex-wrap:wrap;flex:0 0 auto}
+.rt-yol-k{
+  width:clamp(26px,4.4vh,42px);aspect-ratio:1;border-radius:50%;
+  background:rgba(255,255,255,.45);display:grid;place-items:center;
+  font-size:clamp(12px,2vh,20px);font-weight:900;color:#fff;
+}
+.rt-yol-k.dolu{background:#22C55E}
+.rt-yol-k.simdi{background:#FFC53D;color:#5A3B00;animation:pulse 1.2s ease-in-out infinite}
+.rt-nesneler{
+  display:flex;gap:clamp(5px,1.2vw,12px);justify-content:center;flex-wrap:wrap;flex:0 0 auto;
+}
+.rt-nesne{
+  position:relative;width:clamp(46px,8.5vh,86px);aspect-ratio:1;border-radius:20px;
+  background:#fff;display:grid;place-items:center;
+  box-shadow:0 5px 0 rgba(0,0,0,.12);opacity:.42;filter:grayscale(.6);
+  transition:.25s;touch-action:none;
+}
+.rt-nesne-e{font-size:clamp(22px,4.4vh,46px);line-height:1}
+.rt-nesne.aktif{
+  opacity:1;filter:none;transform:translateY(-6px) scale(1.1);
+  box-shadow:0 0 0 5px #FFC53D,0 0 26px 6px rgba(255,197,61,.7),0 6px 0 rgba(0,0,0,.14);
+  cursor:grab;
+}
+.rt-nesne.aktif .rt-parilti{
+  position:absolute;inset:-6px;border-radius:24px;
+  border:3px solid rgba(255,197,61,.85);animation:pulse 1.1s ease-in-out infinite;
+}
+.rt-nesne.tanit{outline:4px solid #7EC8F0;outline-offset:-2px}
+
+/* ===== Harf oyunu (Endless Alphabet) ===== */
+.options-area.harf{
+  grid-template-columns:1fr;
+  display:grid;grid-template-rows:auto minmax(0,1fr);
+  gap:clamp(8px,2vh,20px);align-content:center;overflow:hidden;
+}
+.hf-resim{font-size:min(20vh,30vw);line-height:1;filter:drop-shadow(0 6px 8px rgba(0,0,0,.2))}
+.hf-resim.anim-uc{animation:hfUc 1.6s ease-in-out infinite}
+.hf-resim.anim-zipla{animation:hfZipla .7s ease-in-out infinite}
+.hf-resim.anim-salla{animation:hfSalla 1.1s ease-in-out infinite}
+.hf-resim.anim-yuz{animation:hfYuz 1.8s ease-in-out infinite}
+.hf-resim.anim-buyu{animation:hfBuyu 1.4s ease-in-out infinite}
+@keyframes hfUc{0%,100%{transform:translate(0,0) rotate(-4deg)}50%{transform:translate(18px,-22px) rotate(6deg)}}
+@keyframes hfZipla{0%,100%{transform:translateY(0) scaleY(1)}40%{transform:translateY(-26px) scaleY(1.06)}}
+@keyframes hfSalla{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+@keyframes hfYuz{0%,100%{transform:translateX(-22px) scaleX(1)}50%{transform:translateX(22px) scaleX(-1)}}
+@keyframes hfBuyu{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+
+.hf-yuvalar{display:flex;justify-content:center;gap:clamp(5px,1.4vw,14px);flex-wrap:wrap;flex:0 0 auto}
+.hf-yuvalar.tamam{animation:popCorrect .7s ease}
+.hf-yuva{
+  width:clamp(46px,10vh,110px);aspect-ratio:.82;border-radius:20px;
+  border:5px dashed rgba(255,255,255,.8);background:rgba(255,255,255,.24);
+  display:grid;place-items:center;transition:.2s;
+}
+.hf-yuva.aktif{border-color:#22C55E;background:rgba(34,197,94,.3);transform:scale(1.08)}
+.hf-yuva.dolu{border-style:solid;border-color:#fff;background:#fff;box-shadow:0 5px 0 rgba(0,0,0,.12)}
+.hf-golge{font-size:clamp(24px,6vh,64px);opacity:.3;color:#fff;line-height:1}
+.hf-yerlesti{font-size:clamp(24px,6vh,64px);line-height:1;animation:popCorrect .5s ease}
+.hf-havuz{
+  display:flex;justify-content:center;align-content:center;gap:clamp(6px,1.6vw,16px);
+  flex-wrap:wrap;min-height:0;
+}
+.hf-harf{
+  width:clamp(48px,10.5vh,116px);aspect-ratio:.82;border-radius:22px;background:#fff;
+  display:grid;place-items:center;font-size:clamp(26px,6.4vh,68px);line-height:1;
+  box-shadow:0 7px 0 rgba(0,0,0,.14),0 10px 20px rgba(43,27,84,.2);
+  touch-action:none;cursor:grab;
+}
+.hf-harf.hayalet{box-shadow:none;background:rgba(255,255,255,.94)}

@@ -1,7 +1,7 @@
 /* Alya'nın Oyunları — Service Worker */
 
 /* Uygulama dosyaları: her sürümde yenilenir */
-const CORE_CACHE = 'alya-core-v10.0.0';
+const CORE_CACHE = 'alya-core-v10.1.0';
 /* Ses ve görseller: sürümden bağımsız, bir kez inip kalır */
 const MEDIA_CACHE = 'alya-media-v1';
 
@@ -35,6 +35,8 @@ const CORE = [
   './veri-moda.js',
   './veri-hikaye.js',
   './surukle.js',
+  './motor-rutin.js',
+  './veri-rutin.js',
   './game-toplan.js',
   './game-agac.js',
   './game-duygu.js',
