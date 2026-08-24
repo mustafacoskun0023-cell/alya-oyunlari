@@ -1,180 +1,153 @@
-/* ===== Tesettür Moda Atölyesi — giydirme oyunu =====
-   Mina'yı giydiriyoruz. Sol/üstte parça rafları (eşarp, elbise,
-   ayakkabı, çanta), ortada karakter. Her parçaya dokununca adı
-   söylenir ve anında üzerine giydirilir — okuma gerekmez.
-   Serbest mod: istediğini giy. Görev modu: "Camiye gidiyoruz,
-   uygun kombini hazırla" gibi hedefler. */
+/* ===== Tesettür Moda Atölyesi — sürükle & bırak giydirme =====
+   Alya parçayı parmağıyla tutup Mina'nın üstüne götürüyor ve bırakıyor.
+   Doğru bölgeye bırakırsa giydiriyor, yanlış bölgeye bırakırsa Mina
+   nazikçe "eşarp başa gider" diyor. Dokunup bırakmak da çalışıyor
+   (sürükleyemeyen küçük parmaklar için).
+
+   Görseller gorseller/ klasöründen katman katman geliyor; görsel
+   yoksa emoji yedeğe düşüyor, oyun yine oynanıyor.                */
 window.GameGiydirme = (function () {
 
-  /* ---- parça katalogu ---- */
+  /* Katmanların sahne üzerindeki yeri — yüzde, sahne kutusuna göre.
+     Görseller değişirse tek yerden ayarlanır.                      */
+  const KATMAN = {
+    esarp:    { top: 1,  left: 50, w: 47, z: 4, bolge: [0, 42],   ad: 'Eşarp',    e: '🧕' },
+    elbise:   { top: 24, left: 50, w: 66, z: 2, bolge: [24, 88],  ad: 'Elbise',   e: '👗' },
+    ayakkabi: { top: 84, left: 50, w: 48, z: 3, bolge: [78, 100], ad: 'Ayakkabı', e: '👟' },
+    canta:    { top: 50, left: 82, w: 24, z: 5, bolge: [34, 78],  ad: 'Çanta',    e: '👜' }
+  };
+  const SIRA = ['esarp', 'elbise', 'ayakkabi', 'canta'];
+
   const PARCA = {
     esarp: [
-      { id: 'esp-pembe',  ad: 'Pembe eşarp',   renk: '#F7A8C4' },
-      { id: 'esp-lila',   ad: 'Lila eşarp',    renk: '#C9AEE8' },
-      { id: 'esp-mint',   ad: 'Mint eşarp',    renk: '#A8DCC8' },
-      { id: 'esp-krem',   ad: 'Krem eşarp',    renk: '#EBDCC2' },
-      { id: 'esp-mavi',   ad: 'Mavi eşarp',    renk: '#A9C8E8' },
-      { id: 'esp-bordo',  ad: 'Bordo eşarp',   renk: '#B36B7E' }
+      { id: 'giy-esarp-pembe',  ad: 'Pembe eşarp',    dosya: 'giy-esarp-pembe',  renk: '#F7A8C4' },
+      { id: 'giy-esarp-lila',   ad: 'Lila eşarp',     dosya: 'giy-esarp-lila',   renk: '#C9AEE8' },
+      { id: 'giy-esarp-mint',   ad: 'Mint eşarp',     dosya: 'giy-esarp-mint',   renk: '#A8DCC8' },
+      { id: 'giy-esarp-krem',   ad: 'Krem eşarp',     dosya: 'giy-esarp-krem',   renk: '#EBDCC2' },
+      { id: 'giy-esarp-mavi',   ad: 'Mavi eşarp',     dosya: 'giy-esarp-mavi',   renk: '#A9C8E8' },
+      { id: 'giy-esarp-bordo',  ad: 'Bordo eşarp',    dosya: 'giy-esarp-bordo',  renk: '#B36B7E' }
     ],
     elbise: [
-      { id: 'elb-pembe',  ad: 'Pembe elbise',  renk: '#F2A2BE' },
-      { id: 'elb-lila',   ad: 'Lila elbise',   renk: '#BFA4E0' },
-      { id: 'elb-yesil',  ad: 'Yeşil elbise',  renk: '#9FD3B8' },
-      { id: 'elb-krem',   ad: 'Krem elbise',   renk: '#E8D8BC' },
-      { id: 'elb-lacivert',ad: 'Lacivert elbise', renk: '#5C6B96' },
-      { id: 'elb-sari',   ad: 'Sarı elbise',   renk: '#F0D188' }
+      { id: 'giy-elbise-pembe', ad: 'Pembe elbise',   dosya: 'giy-elbise-pembe', renk: '#F2A2BE' },
+      { id: 'giy-elbise-lila',  ad: 'Lila elbise',    dosya: 'giy-elbise-lila',  renk: '#BFA4E0' },
+      { id: 'giy-elbise-yesil', ad: 'Yeşil elbise',   dosya: 'giy-elbise-yesil', renk: '#9FD3B8' },
+      { id: 'giy-elbise-krem',  ad: 'Krem elbise',    dosya: 'giy-elbise-krem',  renk: '#E8D8BC' },
+      { id: 'giy-elbise-lacivert', ad: 'Lacivert elbise', dosya: 'giy-elbise-lacivert', renk: '#5C6B96' },
+      { id: 'giy-elbise-sari',  ad: 'Sarı elbise',    dosya: 'giy-elbise-sari',  renk: '#F0D188' }
     ],
     ayakkabi: [
-      { id: 'ayk-pembe',  ad: 'Pembe ayakkabı', renk: '#F2A2BE' },
-      { id: 'ayk-beyaz',  ad: 'Beyaz ayakkabı', renk: '#F4F1EC' },
-      { id: 'ayk-kahve',  ad: 'Kahve bot',      renk: '#A87C58' },
-      { id: 'ayk-mavi',   ad: 'Mavi ayakkabı',  renk: '#8FB4DC' }
+      { id: 'giy-ayk-pembe',    ad: 'Pembe ayakkabı', dosya: 'giy-ayk-pembe',    renk: '#F2A2BE' },
+      { id: 'giy-ayk-beyaz',    ad: 'Beyaz ayakkabı', dosya: 'giy-ayk-beyaz',    renk: '#F4F1EC' },
+      { id: 'giy-ayk-kahve',    ad: 'Kahve bot',      dosya: 'giy-ayk-kahve',    renk: '#A87C58' },
+      { id: 'giy-ayk-mavi',     ad: 'Mavi ayakkabı',  dosya: 'giy-ayk-mavi',     renk: '#8FB4DC' }
     ],
     canta: [
-      { id: 'cnt-yok',    ad: 'Çanta yok',      renk: null },
-      { id: 'cnt-pembe',  ad: 'Pembe çanta',    renk: '#F2A2BE' },
-      { id: 'cnt-krem',   ad: 'Krem çanta',     renk: '#E5D3B3' },
-      { id: 'cnt-lila',   ad: 'Lila çanta',     renk: '#C4A8E4' }
+      { id: 'giy-canta-pembe',  ad: 'Pembe çanta',    dosya: 'giy-canta-pembe',  renk: '#F2A2BE' },
+      { id: 'giy-canta-krem',   ad: 'Krem çanta',     dosya: 'giy-canta-krem',   renk: '#E5D3B3' },
+      { id: 'giy-canta-lila',   ad: 'Lila çanta',     dosya: 'giy-canta-lila',   renk: '#C4A8E4' },
+      { id: 'giy-canta-yok',    ad: 'Çanta istemiyorum', dosya: null,            renk: null }
     ]
   };
 
-  const RAF = [
-    { anahtar: 'esarp',    ad: 'Eşarp',     e: '🧕' },
-    { anahtar: 'elbise',   ad: 'Elbise',    e: '👗' },
-    { anahtar: 'ayakkabi', ad: 'Ayakkabı',  e: '👟' },
-    { anahtar: 'canta',    ad: 'Çanta',     e: '👜' }
-  ];
-
-  /* ---- görevler: hangi ortama ne yakışır ---- */
   const GOREVLER = [
-    { id: 'gyd-cami',   e: '🕌', metin: 'Camiye gidiyoruz. Sade ve şık bir kombin hazırla!',
-      ipucu: 'Camiye giderken sade renkler ve uzun elbise güzel durur.',
-      kural: k => k.elbise && k.esarp,
+    { id: 'gyd-cami',   e: '🕌', metin: 'Camiye gidiyoruz. Mina’yı sade ve şık giydirelim!',
+      gerek: ['esarp', 'elbise', 'ayakkabi'],
       ders: 'Camiye giderken temiz, sade ve kapalı giyinmek güzel bir edeptir.' },
     { id: 'gyd-bayram', e: '🎁', metin: 'Bayram sabahı! En güzel kombini hazırla.',
-      ipucu: 'Bayramda canlı ve neşeli renkler seçebilirsin.',
-      kural: k => k.elbise && k.esarp && k.ayakkabi,
+      gerek: ['esarp', 'elbise', 'ayakkabi', 'canta'],
       ders: 'Bayramda en güzel kıyafetimizi giymek, o günü kutlamaktır.' },
     { id: 'gyd-park',   e: '🌳', metin: 'Parka gidiyoruz. Rahat bir kombin hazırla!',
-      ipucu: 'Parkta koşacağız, rahat ayakkabı önemli.',
-      kural: k => k.elbise && k.ayakkabi,
+      gerek: ['elbise', 'ayakkabi'],
       ders: 'Oynayacağımız yerlerde rahat kıyafet seçmek en iyisidir.' },
-    { id: 'gyd-misafir',e: '🍰', metin: 'Misafirliğe gidiyoruz. Şık bir kombin hazırla!',
-      ipucu: 'Misafirliğe giderken çanta da güzel tamamlar.',
-      kural: k => k.elbise && k.esarp && k.canta && k.canta !== 'cnt-yok',
+    { id: 'gyd-misafir',e: '🍰', metin: 'Misafirliğe gidiyoruz. Çantayı da unutma!',
+      gerek: ['esarp', 'elbise', 'ayakkabi', 'canta'],
       ders: 'Misafirliğe düzgün giyinmek, ev sahibine gösterdiğimiz saygıdır.' },
     { id: 'gyd-okul',   e: '📚', metin: 'Okula gidiyoruz. Düzenli bir kombin hazırla!',
-      ipucu: 'Okulda sade renkler ve rahat ayakkabı iyi olur.',
-      kural: k => k.elbise && k.esarp && k.ayakkabi,
+      gerek: ['esarp', 'elbise', 'ayakkabi'],
       ders: 'Okula düzenli gitmek, öğrenmeye hazır olmak demektir.' },
     { id: 'gyd-serbest',e: '✨', metin: 'Şimdi tamamen serbest! İstediğin kombini yap.',
-      ipucu: 'Ne istersen giyebilirsin, bu senin tasarımın.',
-      kural: () => true,
+      gerek: ['elbise'],
       ders: 'Kendi tarzını bulmak çok güzel. Sen ne seçtiysen o güzel.' }
   ];
 
-  let ctx = null, gi = 0, secili = {}, acikRaf = 'esarp', karakterEl = null;
+  const GORSEL = 'gorseller/';
+  let ctx = null, gi = 0, giyili = {}, acikRaf = 'esarp';
+  let sahneEl = null, katmanEl = {}, surukle = null, hayalet = null;
 
   function mount(c) {
-    ctx = c; gi = 0;
-    secili = { esarp: 'esp-pembe', elbise: 'elb-pembe', ayakkabi: 'ayk-pembe', canta: 'cnt-yok' };
-    ctx.say({ id: 'sys-oyun-giydirme', text: "Mina'yı birlikte giydirelim!" });
-    ctx.duck(2600);
-    setTimeout(kur, 2700);
+    ctx = c; gi = 0; giyili = {}; acikRaf = 'esarp';
+    ctx.say({ id: 'sys-oyun-giydirme', text: 'Kıyafetleri parmağınla tutup Mina’nın üstüne bırak!' });
+    ctx.duck(3400);
+    setTimeout(kur, 3500);
   }
 
-  function parcaBul(anahtar, id) {
-    return PARCA[anahtar].find(p => p.id === id) || PARCA[anahtar][0];
-  }
-
-  /* Mina'nın SVG'si — seçilen renklere göre çizilir */
-  function minaSVG() {
-    const es = parcaBul('esarp', secili.esarp).renk;
-    const el = parcaBul('elbise', secili.elbise).renk;
-    const ay = parcaBul('ayakkabi', secili.ayakkabi).renk;
-    const cn = parcaBul('canta', secili.canta).renk;
-    return `
-<svg viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" class="mina-svg" aria-hidden="true">
-  <defs>
-    <linearGradient id="elbG" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="${el}"/>
-      <stop offset="1" stop-color="${el}" stop-opacity=".78"/>
-    </linearGradient>
-  </defs>
-  <!-- elbise -->
-  <path d="M100 96 C72 96 60 112 56 134 L34 268 C60 282 140 282 166 268 L144 134 C140 112 128 96 100 96 Z"
-        fill="url(#elbG)" stroke="rgba(0,0,0,.16)" stroke-width="2.5" stroke-linejoin="round"/>
-  <!-- kollar -->
-  <path d="M62 118 L40 200 L58 208 L76 136 Z"  fill="${el}" stroke="rgba(0,0,0,.14)" stroke-width="2"/>
-  <path d="M138 118 L160 200 L142 208 L124 136 Z" fill="${el}" stroke="rgba(0,0,0,.14)" stroke-width="2"/>
-  <!-- eller -->
-  <circle cx="48" cy="209" r="10" fill="#F6D3B8"/>
-  <circle cx="152" cy="209" r="10" fill="#F6D3B8"/>
-  <!-- ayakkabılar -->
-  <ellipse cx="80" cy="288" rx="20" ry="11" fill="${ay}" stroke="rgba(0,0,0,.18)" stroke-width="2"/>
-  <ellipse cx="122" cy="288" rx="20" ry="11" fill="${ay}" stroke="rgba(0,0,0,.18)" stroke-width="2"/>
-  <!-- yüz -->
-  <ellipse cx="100" cy="62" rx="34" ry="38" fill="#F8DCC4"/>
-  <!-- eşarp -->
-  <path d="M100 16 C64 16 56 46 58 70 C60 96 74 106 74 106 L60 132 C78 142 122 142 140 132 L126 106
-           C126 106 140 96 142 70 C144 46 136 16 100 16 Z"
-        fill="${es}" stroke="rgba(0,0,0,.14)" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M100 16 C74 16 64 38 64 60 C78 44 122 44 136 60 C136 38 126 16 100 16 Z"
-        fill="#fff" opacity=".18"/>
-  <!-- yüz açıklığı -->
-  <ellipse cx="100" cy="64" rx="26" ry="31" fill="#F8DCC4"/>
-  <!-- gözler ve gülümseme -->
-  <ellipse cx="90" cy="62" rx="4.4" ry="5.2" fill="#3A2A45"/>
-  <ellipse cx="110" cy="62" rx="4.4" ry="5.2" fill="#3A2A45"/>
-  <circle cx="91.6" cy="60.2" r="1.5" fill="#fff"/>
-  <circle cx="111.6" cy="60.2" r="1.5" fill="#fff"/>
-  <ellipse cx="80" cy="72" rx="6" ry="4" fill="#F4A8B8" opacity=".6"/>
-  <ellipse cx="120" cy="72" rx="6" ry="4" fill="#F4A8B8" opacity=".6"/>
-  <path d="M92 76 q8 7 16 0" fill="none" stroke="#B4667A" stroke-width="2.6" stroke-linecap="round"/>
-  ${cn ? `<!-- çanta -->
-  <rect x="150" y="196" width="34" height="30" rx="7" fill="${cn}" stroke="rgba(0,0,0,.16)" stroke-width="2"/>
-  <path d="M158 196 q9 -14 18 0" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="3"/>` : ''}
-</svg>`;
+  /* --- görsel ya da emoji --- */
+  function parcaGorsel(anahtar, p, sinif) {
+    const k = KATMAN[anahtar];
+    if (!p.dosya) return `<span class="${sinif} yedek-e">✖</span>`;
+    return `<img class="${sinif}" src="${GORSEL}${p.dosya}.webp" alt="" draggable="false"
+              onerror="this.replaceWith(Object.assign(document.createElement('span'),
+                {className:'${sinif} yedek-e',textContent:'${k.e}',
+                 style:'color:${p.renk || '#bbb'}'}))">`;
   }
 
   function kur() {
     const g = GOREVLER[gi];
+    giyili = {};
     ctx.prompt.innerHTML = `
       <div class="prompt-side">
         <div class="gorev-serit"><span class="gorev-e">${g.e}</span>
           <span class="gorev-t">${g.metin}</span></div>
       </div>`;
     ctx.setProgress(gi, GOREVLER.length);
-    ctx.duck(3000);
+    ctx.duck(3200);
     ctx.say({ id: g.id, text: g.metin });
 
     ctx.options.className = 'options-area giydirme';
     ctx.options.style.gridTemplateColumns = '';
     ctx.options.innerHTML = `
-      <div class="giy-sahne"><div class="giy-mina" id="giyMina">${minaSVG()}</div></div>
+      <div class="giy-sahne" id="giySahne">
+        <img class="giy-taban" src="${GORSEL}giy-mina.webp" alt="" draggable="false"
+             onerror="this.replaceWith(Object.assign(document.createElement('span'),
+               {className:'giy-taban yedek-e',textContent:'🧍‍♀️'}))">
+        <div class="giy-katmanlar" id="giyKatman"></div>
+        <div class="giy-hedef" id="giyHedef"></div>
+      </div>
       <div class="giy-panel">
         <div class="raf-sekme" id="rafSekme"></div>
         <div class="raf-parcalar" id="rafParca"></div>
+        <div class="giy-ipucu" id="giyIpucu">Parçayı tut, Mina’nın üstüne bırak</div>
         <button class="pill-btn green giy-hazir" id="giyHazir">✅ Hazır!</button>
       </div>`;
-    karakterEl = ctx.options.querySelector('#giyMina');
-    sekmeCiz();
-    rafCiz();
+    sahneEl = ctx.options.querySelector('#giySahne');
+    katmanEl = {};
+    sekmeCiz(); rafCiz();
+    hedefCiz();
     ctx.options.querySelector('#giyHazir').addEventListener('click', hazir);
+  }
+
+  /* Bırakma bölgelerini görünmez kutular olarak hazırla */
+  function hedefCiz() {
+    const el = ctx.options.querySelector('#giyHedef');
+    el.innerHTML = SIRA.map(a => {
+      const k = KATMAN[a];
+      return `<div class="hedef-kutu" data-a="${a}"
+               style="top:${k.bolge[0]}%;height:${k.bolge[1] - k.bolge[0]}%"></div>`;
+    }).join('');
   }
 
   function sekmeCiz() {
     const el = ctx.options.querySelector('#rafSekme');
     el.innerHTML = '';
-    RAF.forEach(r => {
+    SIRA.forEach(a => {
+      const k = KATMAN[a];
       const b = document.createElement('button');
-      b.className = 'raf-btn' + (r.anahtar === acikRaf ? ' acik' : '');
-      b.innerHTML = `<span class="raf-e">${r.e}</span><span class="raf-ad">${r.ad}</span>`;
+      b.className = 'raf-btn' + (a === acikRaf ? ' acik' : '') + (giyili[a] ? ' giyildi' : '');
+      b.innerHTML = `<span class="raf-e">${k.e}</span><span class="raf-ad">${k.ad}</span>` +
+                    (giyili[a] ? '<span class="raf-tik">✓</span>' : '');
       b.addEventListener('click', () => {
-        acikRaf = r.anahtar;
-        Snd.sfx.tap();
-        Snd.say({ id: 'giy-raf-' + r.anahtar, text: r.ad });
-        Snd.duck(1200);
+        acikRaf = a; Snd.sfx.tap();
+        Snd.duck(1200); Snd.say({ id: 'giy-raf-' + a, text: k.ad });
         sekmeCiz(); rafCiz();
       });
       el.appendChild(b);
@@ -185,38 +158,146 @@ window.GameGiydirme = (function () {
     const el = ctx.options.querySelector('#rafParca');
     el.innerHTML = '';
     PARCA[acikRaf].forEach(p => {
-      const b = document.createElement('button');
-      b.className = 'parca' + (secili[acikRaf] === p.id ? ' secili' : '');
-      b.innerHTML = p.renk
-        ? `<span class="parca-renk" style="background:${p.renk}"></span>`
-        : `<span class="parca-renk yok">✖</span>`;
-      b.setAttribute('aria-label', p.ad);
-      b.addEventListener('click', () => {
-        secili[acikRaf] = p.id;
-        Snd.sfx.tap();
-        Snd.duck(1400);
-        Snd.say({ id: p.id, text: p.ad });      // parçanın adı söylenir
-        karakterEl.innerHTML = minaSVG();
-        karakterEl.classList.remove('giydi'); void karakterEl.offsetWidth;
-        karakterEl.classList.add('giydi');
-        rafCiz();
-      });
+      const b = document.createElement('div');
+      b.className = 'parca' + (giyili[acikRaf] === p.id ? ' secili' : '');
+      b.innerHTML = parcaGorsel(acikRaf, p, 'parca-img');
+      b.dataset.id = p.id;
+      b._p = p; b._a = acikRaf;
+      tutmaBagla(b, p, acikRaf);
       el.appendChild(b);
     });
   }
 
+  /* ---------- sürükle & bırak ---------- */
+  function tutmaBagla(el, p, anahtar) {
+    el.addEventListener('pointerdown', ev => {
+      ev.preventDefault();
+      el.setPointerCapture(ev.pointerId);
+      surukle = { p, anahtar, x: ev.clientX, y: ev.clientY, tasidi: false, el };
+      Snd.duck(1500);
+      Snd.say({ id: p.id, text: p.ad });   // tutar tutmaz adını söyler
+      el.classList.add('tutuluyor');
+    });
+    el.addEventListener('pointermove', ev => {
+      if (!surukle || surukle.el !== el) return;
+      const dx = ev.clientX - surukle.x, dy = ev.clientY - surukle.y;
+      if (!surukle.tasidi && Math.hypot(dx, dy) < 10) return;
+      if (!surukle.tasidi) { surukle.tasidi = true; hayaletYap(p, anahtar); }
+      hayaletTasi(ev.clientX, ev.clientY);
+      hedefVurgula(ev.clientX, ev.clientY);
+    });
+    ['pointerup', 'pointercancel'].forEach(t => el.addEventListener(t, ev => {
+      if (!surukle || surukle.el !== el) return;
+      el.classList.remove('tutuluyor');
+      if (surukle.tasidi) birak(ev.clientX, ev.clientY);
+      else giydir(anahtar, p);          // sürüklemeden dokunduysa da giydir
+      hayaletSil(); surukle = null;
+      [...ctx.options.querySelectorAll('.hedef-kutu')].forEach(h => h.classList.remove('aktif'));
+    }));
+  }
+
+  function hayaletYap(p, anahtar) {
+    hayaletSil();
+    hayalet = document.createElement('div');
+    hayalet.className = 'giy-hayalet';
+    hayalet.innerHTML = parcaGorsel(anahtar, p, 'hayalet-img');
+    document.body.appendChild(hayalet);
+  }
+  function hayaletTasi(x, y) { if (hayalet) { hayalet.style.left = x + 'px'; hayalet.style.top = y + 'px'; } }
+  function hayaletSil() { if (hayalet) { hayalet.remove(); hayalet = null; } }
+
+  function hedefAlti(x, y) {
+    if (!sahneEl) return null;
+    const r = sahneEl.getBoundingClientRect();
+    if (x < r.left || x > r.right || y < r.top || y > r.bottom) return null;
+    const oran = (y - r.top) / r.height * 100;
+    return SIRA.find(a => {
+      const [b1, b2] = KATMAN[a].bolge;
+      return oran >= b1 && oran <= b2;
+    }) || null;
+  }
+
+  function hedefVurgula(x, y) {
+    const a = surukle && surukle.anahtar;
+    const ust = hedefAlti(x, y);
+    [...ctx.options.querySelectorAll('.hedef-kutu')].forEach(h =>
+      h.classList.toggle('aktif', h.dataset.a === a && ust === a));
+  }
+
+  function birak(x, y) {
+    const { p, anahtar } = surukle;
+    const r = sahneEl.getBoundingClientRect();
+    const icinde = x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    if (!icinde) { Snd.sfx.whoosh(); return; }
+
+    const ust = hedefAlti(x, y);
+    if (ust === anahtar) { giydir(anahtar, p); return; }
+
+    // yanlış bölge — nazikçe yönlendir
+    Snd.sfx.wrong(); ctx.oops(); Snd.duck(2200);
+    const yer = { esarp: 'başına', elbise: 'üstüne', ayakkabi: 'ayağına', canta: 'eline' }[anahtar];
+    Snd.say({ id: 'giy-yanlis-' + anahtar, text: `${KATMAN[anahtar].ad} ${yer} gider. Bir daha dene!` });
+    const ip = ctx.options.querySelector('#giyIpucu');
+    if (ip) {
+      ip.textContent = `${KATMAN[anahtar].ad} ${yer} gider 👆`;
+      ip.classList.add('uyari');
+      setTimeout(() => { ip.textContent = 'Parçayı tut, Mina’nın üstüne bırak'; ip.classList.remove('uyari'); }, 2600);
+    }
+    const hk = ctx.options.querySelector(`.hedef-kutu[data-a="${anahtar}"]`);
+    if (hk) { hk.classList.add('goster'); setTimeout(() => hk.classList.remove('goster'), 2200); }
+  }
+
+  function giydir(anahtar, p) {
+    giyili[anahtar] = p.id;
+    const kap = ctx.options.querySelector('#giyKatman');
+    const k = KATMAN[anahtar];
+    let el = katmanEl[anahtar];
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'giy-katman k-' + anahtar;
+      el.style.cssText = `top:${k.top}%;left:${k.left}%;width:${k.w}%;z-index:${k.z}`;
+      kap.appendChild(el);
+      katmanEl[anahtar] = el;
+    }
+    el.innerHTML = p.dosya ? parcaGorsel(anahtar, p, 'katman-img') : '';
+    el.classList.remove('giydi'); void el.offsetWidth; el.classList.add('giydi');
+
+    Snd.sfx.correct();
+    const r = el.getBoundingClientRect();
+    FX.confetti(24, r.left + r.width / 2, r.top + r.height / 2);
+    sekmeCiz(); rafCiz();
+
+    // hepsi tamamsa "Hazır" düğmesi parlasın
+    const g = GOREVLER[gi];
+    const tamam = g.gerek.every(a => giyili[a]);
+    const hz = ctx.options.querySelector('#giyHazir');
+    if (hz) hz.classList.toggle('parla', tamam);
+  }
+
   function hazir() {
     const g = GOREVLER[gi];
+    const eksik = g.gerek.filter(a => !giyili[a]);
+    if (eksik.length) {
+      Snd.sfx.wrong(); ctx.oops(); Snd.duck(2400);
+      const ad = KATMAN[eksik[0]].ad;
+      Snd.say({ id: 'giy-eksik-' + eksik[0], text: `${ad} eksik. Onu da giydirelim!` });
+      acikRaf = eksik[0]; sekmeCiz(); rafCiz();
+      const hk = ctx.options.querySelector(`.hedef-kutu[data-a="${eksik[0]}"]`);
+      if (hk) { hk.classList.add('goster'); setTimeout(() => hk.classList.remove('goster'), 2400); }
+      return;
+    }
+
     Snd.sfx.correct(); Snd.sfx.applause(); ctx.happy();
-    const r = karakterEl.getBoundingClientRect();
-    FX.confetti(90, r.left + r.width / 2, r.top + r.height / 3);
-    ctx.duck(5200);
+    const r = sahneEl.getBoundingClientRect();
+    FX.confetti(100, r.left + r.width / 2, r.top + r.height / 3);
+    ctx.duck(5400);
     ctx.say({ id: g.id + '-ders', text: g.ders }, { delay: 700 });
 
     const kutu = document.createElement('div');
     kutu.className = 'aciklama-balon gorun';
     kutu.textContent = g.ders;
     ctx.prompt.appendChild(kutu);
+    sahneEl.classList.add('kutlama');
 
     gi++;
     ctx.setProgress(gi, GOREVLER.length);
@@ -224,16 +305,13 @@ window.GameGiydirme = (function () {
       if (gi >= GOREVLER.length) {
         ctx.options.className = 'options-area';
         ctx.finish(3, 'Bütün kombinleri hazırladın!');
-      } else {
-        Snd.sfx.star();
-        kur();
-      }
-    }, Math.min(2200 + g.ders.length * 82, 7500));
+      } else { Snd.sfx.star(); kur(); }
+    }, Math.min(2400 + g.ders.length * 82, 7500));
   }
 
   return {
-    id: 'giydirme', title: 'Moda<br>Atölyesi', emoji: '🧕', mode: 'custom',
-    intro: { id: 'sys-oyun-giydirme', text: "Mina'yı birlikte giydirelim!" },
+    id: 'giydirme', title: 'Mina’yı<br>Giydir', emoji: '🧕', mode: 'custom',
+    intro: { id: 'sys-oyun-giydirme', text: 'Kıyafetleri parmağınla tutup Mina’nın üstüne bırak!' },
     mount
   };
 })();

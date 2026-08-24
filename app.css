@@ -566,7 +566,7 @@ body::before{
 .ozet-satir.bos b{color:#8A8FA6}
 .pill-btn.red{background:linear-gradient(180deg,#FF7A7A,#EF4444);color:#fff}
 
-/* ===== Giydirme atölyesi ===== */
+/* ===== Giydirme atölyesi (sürükle & bırak) ===== */
 .gorev-serit{
   display:flex;align-items:center;gap:10px;
   background:rgba(255,255,255,.92);border-radius:999px;
@@ -578,55 +578,101 @@ body::before{
 .gorev-t{font-size:clamp(13px,2.3vh,22px);color:var(--ink);line-height:1.2}
 
 .options-area.giydirme{
-  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);
-  gap:clamp(8px,2vw,20px);align-items:stretch;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
+  gap:clamp(8px,2vw,20px);align-items:stretch;overflow:hidden;
 }
 .giy-sahne{
-  display:flex;align-items:center;justify-content:center;min-height:0;
+  position:relative;min-height:0;
   background:linear-gradient(180deg,#FFF3FA,#EAF3FF);
-  border-radius:var(--card-r);box-shadow:var(--shadow);padding:clamp(6px,1.4vh,16px);
+  border-radius:var(--card-r);box-shadow:var(--shadow);overflow:hidden;
+  touch-action:none;
 }
-.giy-mina{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
-.mina-svg{height:100%;width:auto;max-width:100%;filter:drop-shadow(0 6px 8px rgba(43,27,84,.22))}
-.giy-mina.giydi .mina-svg{animation:giydiPop .45s cubic-bezier(.2,.9,.3,1.6)}
-@keyframes giydiPop{0%{transform:scale(.95)}55%{transform:scale(1.04)}100%{transform:scale(1)}}
+.giy-sahne.kutlama{animation:popCorrect .6s ease}
+.giy-taban{
+  position:absolute;top:2%;left:50%;transform:translateX(-50%);
+  height:96%;width:auto;max-width:96%;object-fit:contain;z-index:1;
+  filter:drop-shadow(0 6px 8px rgba(43,27,84,.2));
+}
+.giy-taban.yedek-e{
+  display:grid;place-items:center;font-size:min(60vh,44vw);height:96%;width:100%;
+}
+.giy-katmanlar{position:absolute;inset:0;z-index:2;pointer-events:none}
+.giy-katman{position:absolute;transform:translateX(-50%);display:flex;justify-content:center}
+.katman-img{width:100%;height:auto;object-fit:contain;
+  filter:drop-shadow(0 3px 5px rgba(43,27,84,.22));}
+.katman-img.yedek-e{font-size:clamp(30px,10vh,90px);line-height:1;width:auto}
+.giy-katman.giydi{animation:giydiPop .5s cubic-bezier(.2,.9,.3,1.7)}
+@keyframes giydiPop{0%{transform:translateX(-50%) scale(.6);opacity:.3}
+  60%{transform:translateX(-50%) scale(1.08);opacity:1}
+  100%{transform:translateX(-50%) scale(1);opacity:1}}
+
+/* bırakma bölgeleri */
+.giy-hedef{position:absolute;inset:0;z-index:6;pointer-events:none}
+.hedef-kutu{
+  position:absolute;left:4%;width:92%;border-radius:22px;
+  border:4px dashed transparent;transition:.18s;
+}
+.hedef-kutu.aktif{
+  border-color:#22C55E;background:rgba(34,197,94,.16);
+  box-shadow:inset 0 0 30px rgba(34,197,94,.25);
+}
+.hedef-kutu.goster{border-color:#FF8A00;background:rgba(255,138,0,.14);animation:pulse 1s ease-in-out 2}
 
 .giy-panel{
-  display:flex;flex-direction:column;gap:clamp(6px,1.2vh,12px);min-height:0;
+  display:flex;flex-direction:column;gap:clamp(5px,1vh,10px);min-height:0;
   background:rgba(255,255,255,.92);border-radius:var(--card-r);
   box-shadow:var(--shadow);padding:clamp(8px,1.6vh,16px);
 }
 .raf-sekme{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;flex:0 0 auto}
 .raf-btn{
-  display:flex;flex-direction:column;align-items:center;gap:2px;
+  position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;
   padding:clamp(5px,1vh,10px) 2px;border-radius:16px;background:#F2EEFF;color:var(--ink);
   border:3px solid transparent;
 }
 .raf-btn.acik{background:#FFE7C2;border-color:#FF8A00}
+.raf-btn.giyildi{background:#DCFCE7}
+.raf-tik{position:absolute;top:2px;right:6px;color:#16A34A;font-size:clamp(11px,1.8vh,16px);font-weight:900}
 .raf-e{font-size:clamp(20px,3.4vh,32px);line-height:1}
 .raf-ad{font-size:clamp(10px,1.6vh,15px);font-weight:800}
+
 .raf-parcalar{
   flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(52px,9vh,86px),1fr));
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(58px,10vh,104px),1fr));
   gap:clamp(6px,1.2vh,12px);align-content:start;padding:2px;
 }
 .raf-parcalar::-webkit-scrollbar{display:none}
 .parca{
-  aspect-ratio:1;border-radius:20px;background:#fff;
+  position:relative;aspect-ratio:1;border-radius:20px;background:#fff;
   box-shadow:0 5px 0 rgba(0,0,0,.12),0 8px 14px rgba(43,27,84,.16);
   display:grid;place-items:center;border:4px solid transparent;padding:6px;
+  touch-action:none;cursor:grab;
 }
 .parca.secili{border-color:#22C55E;box-shadow:0 0 0 4px rgba(34,197,94,.28),0 5px 0 rgba(0,0,0,.12)}
-.parca:active{transform:scale(.94)}
-.parca-renk{width:100%;height:100%;border-radius:14px;box-shadow:inset 0 -6px 10px rgba(0,0,0,.14)}
-.parca-renk.yok{
-  background:#F1F2F6;display:grid;place-items:center;color:#9AA0B4;
-  font-size:clamp(16px,2.6vh,26px);box-shadow:none;
+.parca.tutuluyor{transform:scale(.9);opacity:.5;cursor:grabbing}
+.parca-img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+.parca-img.yedek-e{
+  display:grid;place-items:center;font-size:clamp(24px,4.4vh,44px);
+  background:#F4F5F8;border-radius:14px;color:#9AA0B4;
 }
-.giy-hazir{flex:0 0 auto;font-size:clamp(15px,2.6vh,24px);padding:clamp(8px,1.5vh,14px) 18px}
+.giy-hayalet{
+  position:fixed;z-index:60;pointer-events:none;
+  transform:translate(-50%,-50%) scale(1.25);
+  width:clamp(80px,15vh,150px);height:clamp(80px,15vh,150px);
+  filter:drop-shadow(0 8px 12px rgba(43,27,84,.4));
+}
+.hayalet-img{width:100%;height:100%;object-fit:contain}
+.hayalet-img.yedek-e{display:grid;place-items:center;font-size:clamp(44px,9vh,90px)}
+
+.giy-ipucu{
+  flex:0 0 auto;text-align:center;font-size:clamp(11px,1.8vh,16px);
+  color:#6B5AA6;font-weight:800;line-height:1.2;
+}
+.giy-ipucu.uyari{color:#EF4444}
+.giy-hazir{flex:0 0 auto;font-size:clamp(15px,2.6vh,24px);padding:clamp(8px,1.5vh,14px) 18px;opacity:.55}
+.giy-hazir.parla{opacity:1;animation:pulse 1.4s ease-in-out infinite}
 
 @media (orientation:portrait){
-  .options-area.giydirme{grid-template-columns:1fr;grid-template-rows:minmax(0,1.15fr) minmax(0,1fr)}
+  .options-area.giydirme{grid-template-columns:1fr;grid-template-rows:minmax(0,1.1fr) minmax(0,1fr)}
 }
 
 /* ===== Hikaye ===== */
