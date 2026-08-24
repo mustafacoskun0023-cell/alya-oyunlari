@@ -1,92 +1,186 @@
-/* ===== Oyun 1: Sayı Tanıma (1-10) ===== */
+/* ===== Sayıları Öğren — dokunarak sayma =====
+   Endless Numbers modeli: soyut rakam → somut miktar → sayma sesi
+   üçü aynı ekranda birleşir.
+
+   1) Rakam parçalara ayrılmış olarak gelir; çocuk parçayı sürükler,
+      sürüklerken rakam kendi adını söyler ("üüüç").
+   2) Rakam tamamlanınca o sayı kadar nesne belirir.
+   3) Çocuk nesnelere TEK TEK dokunur; her dokunuşta sayılır
+      ("bir… iki… üç") ve dokunulan nesne işaretlenir — aynı nesne
+      iki kez sayılmaz.
+   4) Hepsi sayılınca nesneler birlikte kutlama yapar.
+
+   Yanlış diye bir şey yok, ceza sesi yok.                          */
 window.GameNumbers = (function () {
+
   const WORDS = ['', 'bir', 'iki', 'üç', 'dört', 'beş', 'altı', 'yedi', 'sekiz', 'dokuz', 'on'];
-  const OBJECTS = [
-    { e: '🍎', kod: 'elma',       cogul: 'Elmalar!' },
-    { e: '🍌', kod: 'muz',        cogul: 'Muzlar!' },
-    { e: '🍓', kod: 'cilek',      cogul: 'Çilekler!' },
-    { e: '⭐', kod: 'yildiz',     cogul: 'Yıldızlar!' },
-    { e: '🐟', kod: 'balik',      cogul: 'Balıklar!' },
-    { e: '🎈', kod: 'balon',      cogul: 'Balonlar!' },
-    { e: '🐞', kod: 'ugurbocegi', cogul: 'Uğur böcekleri!' },
-    { e: '🌸', kod: 'cicek',      cogul: 'Çiçekler!' },
-    { e: '🍪', kod: 'kurabiye',   cogul: 'Kurabiyeler!' },
-    { e: '🐥', kod: 'civciv',     cogul: 'Civcivler!' },
-    { e: '🦋', kod: 'kelebek',    cogul: 'Kelebekler!' },
-    { e: '🚗', kod: 'araba',      cogul: 'Arabalar!' }
+  const BW    = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Sekiz', 'Dokuz', 'On'];
+
+  const OBJELER = [
+    { e: '🍎', kod: 'elma',       cogul: 'elma' },
+    { e: '🍌', kod: 'muz',        cogul: 'muz' },
+    { e: '🐟', kod: 'balik',      cogul: 'balık' },
+    { e: '⭐', kod: 'yildiz',     cogul: 'yıldız' },
+    { e: '🎈', kod: 'balon',      cogul: 'balon' },
+    { e: '🐞', kod: 'ugurbocegi', cogul: 'uğur böceği' },
+    { e: '🌸', kod: 'cicek',      cogul: 'çiçek' },
+    { e: '🍪', kod: 'kurabiye',   cogul: 'kurabiye' },
+    { e: '🐥', kod: 'civciv',     cogul: 'civciv' },
+    { e: '🦋', kod: 'kelebek',    cogul: 'kelebek' },
+    { e: '🚗', kod: 'araba',      cogul: 'araba' },
+    { e: '🍓', kod: 'cilek',      cogul: 'çilek' }
   ];
-  const BW = ['', 'Bir', 'İki', 'Üç', 'Dört', 'Beş', 'Altı', 'Yedi', 'Sekiz', 'Dokuz', 'On'];
-  const BAS = 850;   // doğru cevaptan sonra saymaya başlama gecikmesi
-  const ADIM = 620;  // her nesne arası — 4 yaş için acele etmeyen tempo
-  const NUM_COLORS = ['#FF4757', '#2E86FF', '#22C55E', '#FF8A00', '#8B5CF6', '#12C2C2', '#FF5FA2'];
 
-  let order = [];
+  const RENKLER = ['#FF4757', '#2E86FF', '#22C55E', '#FF8A00', '#8B5CF6', '#12C2C2', '#FF5FA2'];
 
-  function start() { order = U.shuffle([1,2,3,4,5,6,7,8,9,10]); }
+  const TUR = 10;
+  let ctx = null, sira = [], i = 0, sayilan = 0, hedef = 0, obj = null, renk = '';
 
-  function objGrid(count, emoji) {
-    // Kare/dar kart için düzen
-    const cols = Math.max(1, Math.ceil(Math.sqrt(count)));
-    const rows = Math.ceil(count / cols);
-    // Geniş kart için düzen (en fazla 2 satır)
-    const rowsW = count <= 4 ? 1 : 2;
-    const colsW = Math.ceil(count / rowsW);
-    let cells = '';
-    for (let i = 0; i < count; i++) cells += `<span>${emoji}</span>`;
-    return `<div class="obj-grid" style="--cols:${cols};--rows:${rows};--colsW:${colsW};--rowsW:${rowsW}">${cells}</div>`;
+  function mount(c) {
+    ctx = c; i = 0;
+    sira = U.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    ctx.options.className = 'options-area sayma';
+    ctx.options.style.gridTemplateColumns = '';
+    ctx.say({ id: 'sys-oyun-sayi', text: 'Hadi birlikte sayalım!' });
+    ctx.duck(2400);
+    setTimeout(kur, 2500);
   }
 
-  // Türkçe'ye uygun büyük harf (i -> İ)
-  function upper(t) { return t.toLocaleUpperCase('tr-TR'); }
+  /* ---------- 1. aşama: rakamı tamamla ---------- */
+  function kur() {
+    if (i >= TUR) return bitir();
+    hedef = sira[i];
+    obj = OBJELER[Math.floor(Math.random() * OBJELER.length)];
+    renk = RENKLER[i % RENKLER.length];
+    sayilan = 0;
 
-  function question(i) {
-    const n = order[i % order.length];
-    const obj = U.pick(OBJECTS);
-    const color = NUM_COLORS[i % NUM_COLORS.length];
+    ctx.setProgress(i, TUR);
+    ctx.prompt.innerHTML = `<div class="prompt-side"><div class="prompt-q big">Rakamı yerine koy!</div></div>`;
+    ctx.options.innerHTML = `
+      <div class="sy-sahne">
+        <div class="sy-yuva" id="syYuva">
+          <span class="sy-golge" style="color:${renk}">${hedef}</span>
+        </div>
+        <div class="sy-parca" id="syParca"></div>
+      </div>`;
 
-    // Yanlış seçenekler: hedefe yakın ama farklı sayılar
-    const pool = [];
-    for (let d = 1; d <= 4; d++) { if (n - d >= 1) pool.push(n - d); if (n + d <= 10) pool.push(n + d); }
-    const wrongs = U.sample(pool, 2);
+    const parcaKap = ctx.options.querySelector('#syParca');
+    const p = document.createElement('div');
+    p.className = 'sy-tut';
+    p.innerHTML = `<span class="sy-rakam" style="color:${renk}">${hedef}</span>`;
+    parcaKap.appendChild(p);
 
-    const opts = U.shuffle([
-      { count: n, correct: true },
-      { count: wrongs[0], correct: false },
-      { count: wrongs[1], correct: false }
-    ]).map(o => ({ html: objGrid(o.count, obj.e), correct: o.correct }));
+    ctx.duck(2000);
+    Snd.say({ id: 'sayi-' + hedef, text: BW[hedef] });
 
-    return {
-      prompt: `
-        <div class="prompt-side">
-          <div class="prompt-bubble">
-            <div class="big-number" style="color:${color}">${n}</div>
-            <div class="number-word" style="color:${color}">${upper(WORDS[n])}</div>
-          </div>
-          <div class="prompt-q">Hangisinde ${WORDS[n]} tane var?</div>
-        </div>`,
-      say: { id: 'nesne-' + obj.kod, text: obj.cogul },
-      sayFollow: { id: 'soru-' + n,
-                   text: `${BW[n]}! Hangisinde ${WORDS[n]} tane var?`, delay: 950 },
-      options: opts,
-      cols: 3,
-      // Doğru cevapta nesneleri tek tek sayar — çocuk saymayı hem duyar hem görür
-      bekle: BAS + n * ADIM + 1500,
-      onCorrectFx: (btn, yardim) => {
-        const ler = [...btn.querySelectorAll('.obj-grid span')];
-        ler.forEach((el, i) => setTimeout(() => {
-          el.style.setProperty('--no', i + 1);
-          el.classList.add('sayilan');
-          Snd.say({ id: 'sayi-' + (i + 1), text: BW[i + 1] }, { keep: i > 0 });
-        }, BAS + i * ADIM));
-        // sayma bitince övgü
-        yardim && yardim.praise(BAS + n * ADIM + 420);
+    let sesTekrar = null;
+    Surukle.bagla(p, {
+      veri: hedef,
+      hayaletHtml: `<span class="sy-rakam hayalet" style="color:${renk}">${hedef}</span>`,
+      tutuldu: () => {
+        // sürüklendiği sürece rakam kendi adını tekrar eder
+        Snd.say({ id: 'sayi-' + hedef, text: BW[hedef] });
+        clearInterval(sesTekrar);
+        sesTekrar = setInterval(() => Snd.say({ id: 'sayi-' + hedef, text: BW[hedef] }), 1100);
+        ctx.duck(4000);
+      },
+      tekDokunus: () => { clearInterval(sesTekrar); yerlesti(p); },
+      hedefSec: (x, y) => {
+        const h = Surukle.hedefBul(ctx.options, '.sy-yuva', x, y);
+        const yuva = ctx.options.querySelector('#syYuva');
+        if (yuva) yuva.classList.toggle('aktif', !!h);
+      },
+      birakildi: (v, x, y) => {
+        clearInterval(sesTekrar);
+        const yuva = ctx.options.querySelector('#syYuva');
+        if (yuva) yuva.classList.remove('aktif');
+        const h = Surukle.hedefBul(ctx.options, '.sy-yuva', x, y);
+        if (h) yerlesti(p);
+        // yuvaya değilse hiçbir şey olmaz — ceza yok, parça yerinde kalır
       }
-    };
+    });
+  }
+
+  function yerlesti(p) {
+    const yuva = ctx.options.querySelector('#syYuva');
+    if (!yuva || yuva.classList.contains('dolu')) return;
+    yuva.classList.add('dolu');
+    yuva.innerHTML = `<span class="sy-rakam yerlesti" style="color:${renk}">${hedef}</span>`;
+    p.remove();
+    Snd.sfx.correct();
+    const r = yuva.getBoundingClientRect();
+    FX.confetti(35, r.left + r.width / 2, r.top + r.height / 2);
+    ctx.duck(2000);
+    Snd.say({ id: 'sayi-' + hedef, text: BW[hedef] });
+    setTimeout(saymaAsamasi, 1300);
+  }
+
+  /* ---------- 2. aşama: nesnelere dokunarak say ---------- */
+  function saymaAsamasi() {
+    ctx.prompt.innerHTML = `
+      <div class="prompt-side">
+        <div class="sy-kucuk-rakam" style="color:${renk}">${hedef}</div>
+        <div class="prompt-q">Hepsine dokun ve sayalım!</div>
+      </div>`;
+
+    const sut = hedef <= 3 ? hedef : hedef <= 6 ? 3 : hedef <= 8 ? 4 : 5;
+    ctx.options.innerHTML = `<div class="sy-nesneler" id="syNesne"
+        style="grid-template-columns:repeat(${sut},1fr)"></div>`;
+    const kap = ctx.options.querySelector('#syNesne');
+
+    for (let n = 0; n < hedef; n++) {
+      const b = document.createElement('button');
+      b.className = 'sy-nesne';
+      b.innerHTML = `<span class="sy-nesne-e">${obj.e}</span><span class="sy-no"></span>`;
+      b.addEventListener('click', () => dokun(b));
+      kap.appendChild(b);
+    }
+
+    ctx.duck(2600);
+    Snd.say({ id: 'sys-sayalim', text: 'Hepsine dokun ve sayalım!' });
+  }
+
+  function dokun(b) {
+    if (b.classList.contains('sayildi')) return;   // aynı nesne iki kez sayılmaz
+    sayilan++;
+    b.classList.add('sayildi');
+    b.style.setProperty('--no', sayilan);
+    b.querySelector('.sy-no').textContent = sayilan;
+    Snd.say({ id: 'sayi-' + sayilan, text: BW[sayilan] });
+    ctx.duck(1200);
+
+    if (sayilan >= hedef) setTimeout(tamamlandi, 900);
+  }
+
+  function tamamlandi() {
+    const kap = ctx.options.querySelector('#syNesne');
+    if (kap) kap.classList.add('kutlama');
+    Snd.sfx.correct(); Snd.sfx.applause(); ctx.happy();
+    const r = kap ? kap.getBoundingClientRect() : { left: 0, width: innerWidth, top: 0, height: innerHeight };
+    FX.confetti(90, r.left + r.width / 2, r.top + r.height / 2);
+
+    ctx.prompt.innerHTML = `
+      <div class="prompt-side">
+        <div class="sy-sonuc"><span class="sy-sonuc-r" style="color:${renk}">${hedef}</span>
+          <span class="sy-sonuc-t">${BW[hedef]} ${obj.cogul}!</span></div>
+      </div>`;
+    ctx.duck(3000);
+    Snd.say({ id: 'sayi-' + hedef, text: BW[hedef] });
+    Snd.say({ id: 'nesne-' + obj.kod, text: obj.cogul }, { delay: 800, keep: true });
+
+    i++;
+    ctx.setProgress(i, TUR);
+    setTimeout(kur, 2800);
+  }
+
+  function bitir() {
+    ctx.options.className = 'options-area';
+    ctx.finish(3, 'Bire kadar ona kadar saydın!');
   }
 
   return {
-    id: 'numbers', title: 'Sayıları<br>Öğren', emoji: '🔢',
-    intro: { id: 'sys-oyun-sayi', text: 'Hadi sayıları öğrenelim!' },
-    total: 10, start, question
+    id: 'numbers', title: 'Sayıları<br>Öğren', emoji: '🔢', mode: 'custom',
+    intro: { id: 'sys-oyun-sayi', text: 'Hadi birlikte sayalım!' },
+    mount
   };
 })();
