@@ -1,7 +1,7 @@
 /* Alya'nın Oyunları — Service Worker */
 
 /* Uygulama dosyaları: her sürümde yenilenir */
-const CORE_CACHE = 'alya-core-v12.3.0';
+const CORE_CACHE = 'alya-core-v12.3.1';
 /* Ses ve görseller: sürümden bağımsız, bir kez inip kalır */
 const MEDIA_CACHE = 'alya-media-v1';
 
@@ -1248,12 +1248,32 @@ self.addEventListener('install', e => {
   );
 });
 
+/* Bu sürümde İÇERİĞİ DEĞİŞEN medya dosyaları: media cache sürümsüz
+   olduğu için eski kopyalar orada kilitli kalıyordu. Aktivasyonda
+   silinir; ilk kullanımda yenisi iner. (v12: kırpılan kıyafetlar +
+   karakter renkleri; v12.3: baş-omuz modeline dönüşen 8 eşarp.)     */
+const YENILENEN_MEDYA = [
+  'giy-esarp-beyaz','giy-esarp-bordo','giy-esarp-cicekli','giy-esarp-krem',
+  'giy-esarp-lila','giy-esarp-mavi','giy-esarp-mint','giy-esarp-pembe',
+  'giy-aks-bere','giy-aks-bros','giy-aks-kemer','giy-aks-sal',
+  'giy-ayk-beyaz','giy-ayk-kahve','giy-ayk-mavi','giy-ayk-pembe',
+  'giy-ayk-sandalet','giy-ayk-terlik',
+  'giy-canta-krem','giy-canta-lila','giy-canta-pembe','giy-canta-sepet','giy-canta-sirt',
+  'giy-dis-ferace','giy-dis-hirka','giy-dis-mont','giy-dis-yagmurluk','giy-dis-yelek',
+  'giy-elbise-bayram','giy-elbise-cicekli','giy-elbise-krem','giy-elbise-lacivert',
+  'giy-elbise-lila','giy-elbise-pembe','giy-elbise-rahat','giy-elbise-sari',
+  'giy-elbise-tunik','giy-elbise-yesil',
+  'giy-kr-lina','giy-kr-mina','giy-kr-sare','oyun-giydirme'
+].map(id => './gorseller/' + id + '.webp');
+
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
         keys.filter(k => k !== CORE_CACHE && k !== MEDIA_CACHE).map(k => caches.delete(k))
       ))
+      .then(() => caches.open(MEDIA_CACHE))
+      .then(c => Promise.all(YENILENEN_MEDYA.map(u => c.delete(u).catch(() => {}))))
       .then(() => self.clients.claim())
   );
 });
