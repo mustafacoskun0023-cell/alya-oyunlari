@@ -19,14 +19,16 @@ window.GameGiydirme = (function () {
   ];
 
   /* ---------- katman yerleşimi (sahne yüzdesi) ---------- */
+  /* Konumlar gerçek görsellerin alfa sınırlarına göre hesaplandı.
+     h = sahne yüksekliğinin yüzdesi; genişlik otomatik (oran korunur). */
   const KATMAN = {
-    namazlik: { top: 0,  left: 50, w: 78, z: 7, bolge: [0, 96],   ad: 'Namaz örtüsü', e: '🧎' },
-    esarp:    { top: 1,  left: 50, w: 47, z: 5, bolge: [0, 40],   ad: 'Eşarp',        e: '🧕' },
-    elbise:   { top: 24, left: 50, w: 66, z: 2, bolge: [24, 80],  ad: 'Elbise',       e: '👗' },
-    dis:      { top: 22, left: 50, w: 74, z: 3, bolge: [22, 74],  ad: 'Dış giyim',    e: '🧥' },
-    ayakkabi: { top: 84, left: 50, w: 48, z: 4, bolge: [80, 100], ad: 'Ayakkabı',     e: '👟' },
-    canta:    { top: 50, left: 82, w: 24, z: 6, bolge: [40, 78],  ad: 'Çanta',        e: '👜' },
-    aksesuar: { top: 30, left: 50, w: 26, z: 8, bolge: [26, 46],  ad: 'Aksesuar',     e: '🎀' }
+    namazlik: { top: 3,  left: 50, h: 93, z: 7, bolge: [0, 96],   ad: 'Namaz örtüsü', e: '🧎' },
+    esarp:    { top: -2, left: 50, h: 58, z: 5, bolge: [0, 34],   ad: 'Eşarp',        e: '🧕' },
+    elbise:   { top: 21, left: 50, h: 70, z: 2, bolge: [34, 74],  ad: 'Elbise',       e: '👗' },
+    dis:      { top: 16, left: 50, h: 72, z: 3, bolge: [34, 74],  ad: 'Dış giyim',    e: '🧥' },
+    ayakkabi: { top: 76, left: 50, h: 24, z: 4, bolge: [82, 100], ad: 'Ayakkabı',     e: '👟' },
+    canta:    { top: 46, left: 73, h: 26, z: 6, bolge: [74, 82],  ad: 'Çanta',        e: '👜' },
+    aksesuar: { top: 27, left: 50, h: 17, z: 8, bolge: [22, 34],  ad: 'Aksesuar',     e: '🎀' }
   };
 
   /* ---------- parça rafları ---------- */
@@ -378,7 +380,7 @@ window.GameGiydirme = (function () {
     if (!el) {
       el = document.createElement('div');
       el.className = 'giy-katman k-' + anahtar;
-      el.style.cssText = `top:${k.top}%;left:${k.left}%;width:${k.w}%;z-index:${k.z}`;
+      el.style.cssText = `top:${k.top}%;left:${k.left}%;height:${k.h}%;z-index:${k.z}`;
       kap.appendChild(el);
       katmanEl[anahtar] = el;
     }
