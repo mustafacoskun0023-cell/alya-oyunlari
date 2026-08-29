@@ -44,6 +44,19 @@ window.Motor = (function () {
             correct: o.correct,
             ses: { id: d.id + (o.correct ? '-d' : '-y'), text: o.s.t }
           })),
+          /* Doğru seçimde durum emojisi MUTLU SONUCA dönüşür ve
+             kutlayarak büyür: seçimin dünyada bir karşılığı olur. */
+          onCorrectFx: (btn, fx) => {
+            const durumE = document.querySelector('.prompt-bubble .durum-emoji');
+            if (durumE) {
+              durumE.textContent = d.sonucE || d.dogru.e || '🥰';
+              durumE.classList.add('sonuc-mutlu');
+            }
+            const dE = btn.querySelector('.davranis-e');
+            if (dE) dE.classList.add('kelime-canlan', 'anim-zipla');
+            fx.praise(420);
+          },
+          bekle: 2400,
           cols: 2
         };
       }
@@ -83,6 +96,15 @@ window.Motor = (function () {
               onCorrect: o.correct ? { id: dogruKart.id, text: dogruKart.t } : null
             };
           }),
+          onCorrectFx: (btn) => {
+            const durumE = document.querySelector('.prompt-bubble .durum-emoji');
+            if (durumE) {
+              durumE.textContent = d.sonucE || dogruKart.e;
+              durumE.classList.add('sonuc-mutlu');
+            }
+            const dE = btn.querySelector('.davranis-e');
+            if (dE) dE.classList.add('kelime-canlan', 'anim-zipla');
+          },
           cols: 3
         };
       }

@@ -22,6 +22,13 @@ window.GameMemory = (function () {
     return kart <= 6 ? 3 : 4;
   }
 
+  /* "Uğur böceği" -> "ugurbocegi" : kayıtlı ad-* klip kodu */
+  function klipKodu(ad) {
+    return ad.toLocaleLowerCase('tr-TR').replace(/\s+/g, '')
+      .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i')
+      .replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u');
+  }
+
   let ctx = null, seviye = 0, bulunan = 0, hata = 0;
   let acik = [], kilit = false, kalan = 0;
 
@@ -86,6 +93,9 @@ window.GameMemory = (function () {
     if (kilit || b.classList.contains('open') || b.classList.contains('matched')) return;
     b.classList.add('open');
     Snd.sfx.tap();
+    /* Kart kendi adını söyler — kelime dağarcığı her çevirmede çalışır */
+    Snd.duck(900);
+    Snd.say({ id: 'ad-' + klipKodu(b.dataset.ad || ''), text: b.dataset.ad || '' });
     acik.push(b);
     if (acik.length < 2) return;
 
@@ -102,12 +112,7 @@ window.GameMemory = (function () {
         ctx.say({ id: 'sys-hafiza-esles', text: 'Eşleşti!' });
         // eşleşen kartın adını söyle — kelime dağarcığı da gelişsin
         const ad = a.dataset.ad || '';
-        if (ad) {
-          const kod = ad.toLocaleLowerCase('tr-TR').replace(/\s+/g, '')
-            .replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i')
-            .replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u');
-          Snd.say({ id: 'ad-' + kod, text: ad }, { delay: 800, keep: true });
-        }
+        if (ad) Snd.say({ id: 'ad-' + klipKodu(ad), text: ad }, { delay: 800, keep: true });
         bulunan++; kalan--;
         ctx.setProgress(bulunan, TOPLAM_CIFT);
         acik = []; kilit = false;
@@ -115,10 +120,10 @@ window.GameMemory = (function () {
       }, 420);
     } else {
       hata++;
+      /* Ceza sesi yok — 4 yaş için yanlış diye bir şey yoktur, sadece
+         "bu ikisi aynı değilmiş" vardır. Kartlar sessizce kapanır. */
       setTimeout(() => {
         a.classList.add('shake'); c.classList.add('shake');
-        Snd.sfx.wrong();
-        ctx.oops();
       }, 380);
       setTimeout(() => {
         a.classList.remove('open', 'shake'); c.classList.remove('open', 'shake');

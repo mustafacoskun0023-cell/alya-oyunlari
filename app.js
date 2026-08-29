@@ -487,7 +487,8 @@
       if (firstTry) correctFirst++;
       qi++;
       setProgress(qi, G.total);
-      setTimeout(nextQuestion, bekle);
+      const cevapTuru = tur;
+      acilisTimer = setTimeout(() => { if (turGecerli(cevapTuru)) nextQuestion(); }, bekle);
     } else {
       firstTry = false;
       btn.classList.remove('wrong'); void btn.offsetWidth; btn.classList.add('wrong');
