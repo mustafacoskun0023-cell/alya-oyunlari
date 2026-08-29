@@ -141,7 +141,7 @@ window.GameBoyama = (function () {
     ctx = c; si = 0; bitti = 0;
     ctx.say({ id: 'sys-oyun-boyama', text: 'Şekilleri istediğin renklerle boyayalım!' });
     ctx.duck(2400);
-    setTimeout(kur, 2500);
+    setTimeout(kur, 300);
   }
 
   function kur() {
@@ -232,7 +232,7 @@ window.GameCizim = (function () {
     ctx = c; kaydedilen = 0;
     ctx.say({ id: 'sys-oyun-cizim', text: 'Ne istersen çizebilirsin! Hadi başlayalım.' });
     ctx.duck(2600);
-    setTimeout(kur, 2700);
+    setTimeout(kur, 300);
   }
 
   function kur() {
@@ -356,7 +356,7 @@ window.GameIlahi = (function () {
     sira = U.shuffle(PARCALAR);
     ctx.say({ id: 'sys-oyun-ilahi', text: 'Melodiyi dinle, hangi şarkı olduğunu bul!' });
     ctx.duck(3000);
-    setTimeout(soru, 3100);
+    setTimeout(soru, 300);
   }
 
   function soru() {

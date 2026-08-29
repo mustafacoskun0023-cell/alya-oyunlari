@@ -10,7 +10,7 @@ window.HikayeMotoru = function (cfg) {
     ctx = c; hi = 0; dogru = 0;
     hikayeler = U.shuffle(cfg.hikayeler).slice(0, TOPLAM);
     ctx.say(cfg.intro); ctx.duck(2400);
-    setTimeout(hikayeBasla, 2500);
+    setTimeout(hikayeBasla, 300);
   }
 
   function hikayeBasla() {

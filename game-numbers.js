@@ -43,7 +43,7 @@ window.GameNumbers = (function () {
     ctx.options.style.gridTemplateColumns = '';
     ctx.say({ id: 'sys-oyun-sayi', text: 'Hadi birlikte sayalım!' });
     ctx.duck(2400);
-    setTimeout(kur, 2500);
+    setTimeout(kur, 300);
   }
 
   /* ---------- 1. aşama: rakamı tamamla ---------- */

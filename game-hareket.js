@@ -29,7 +29,7 @@ window.GameHareket = (function () {
     ctx.options.style.gridTemplateColumns = '1fr';
     ctx.say({ id: 'sys-oyun-hareket', text: 'Hadi birlikte hareket edelim! Ekranı izle ve aynısını yap.' });
     ctx.duck(3400);
-    setTimeout(basla, 3500);
+    setTimeout(basla, 300);
   }
 
   function basla() {

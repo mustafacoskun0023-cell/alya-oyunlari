@@ -29,7 +29,7 @@ window.GameMemory = (function () {
     ctx = c; seviye = 0; bulunan = 0; hata = 0;
     ctx.say({ id: 'sys-oyun-hafiza', text: 'Hafıza oyunu! Aynı olan kartları bul.' });
     ctx.duck(1800);
-    setTimeout(kur, 1900);
+    setTimeout(kur, 300);
   }
 
   function kur() {

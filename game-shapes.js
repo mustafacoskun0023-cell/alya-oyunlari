@@ -56,7 +56,7 @@ window.GameShapes = (function () {
     ctx.options.style.gridTemplateColumns = '';
     ctx.say({ id: 'sys-oyun-renk', text: 'Şekilleri deliklerine yerleştirelim!' });
     ctx.duck(2800);
-    setTimeout(kur, 2900);
+    setTimeout(kur, 300);
   }
 
   function sekilSVG(s, renk, sinif) {

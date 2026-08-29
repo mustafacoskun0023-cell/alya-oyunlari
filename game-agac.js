@@ -63,7 +63,7 @@ window.GameAgac = (function () {
     ctx.options.style.gridTemplateColumns = '';
     ctx.say({ id: 'sys-oyun-agac', text: 'Her iyilik ağacımızı biraz daha büyütür. Hadi başlayalım!' });
     ctx.duck(3600);
-    setTimeout(kur, 3700);
+    setTimeout(kur, 300);
   }
 
   function agacHtml() {

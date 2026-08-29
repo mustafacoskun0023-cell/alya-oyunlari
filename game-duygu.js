@@ -66,7 +66,7 @@ window.GameDuygu = (function () {
     ctx.options.style.gridTemplateColumns = '';
     ctx.say({ id: 'sys-oyun-duygu', text: 'Mina’ya bir şey göster, yüzü ne olacak bakalım!' });
     ctx.duck(3400);
-    setTimeout(kur, 3500);
+    setTimeout(kur, 300);
   }
 
   function yuzSVG(d) {
@@ -139,7 +139,8 @@ window.GameDuygu = (function () {
   function goster(o) {
     const yuz = ctx.options.querySelector('#dgYuz');
     const et = ctx.options.querySelector('#dgEtiket');
-    if (!yuz) return;
+    /* Oyundan çıkılmışsa bu ögeler artık yok — çakılmadan sessizce çık. */
+    if (!yuz || !et) return;
     suanki = o.tepki;
     yuz.innerHTML = yuzSVG(o.tepki);
     yuz.classList.remove('degisti'); void yuz.offsetWidth; yuz.classList.add('degisti');

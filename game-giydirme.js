@@ -9,26 +9,53 @@
    görsel yoksa emoji yedeğe düşüyor, oyun yine oynanıyor.     */
 window.GameGiydirme = (function () {
 
-  /* ---------- karakterler ---------- */
-  const KARAKTER = [
-    { id: 'kr-mina',   ad: 'Mina',   dosya: 'giy-kr-mina',   e: '👧' },
-    { id: 'kr-lina',   ad: 'Lina',   dosya: 'giy-kr-lina',   e: '👧' },
-    { id: 'kr-zeynep', ad: 'Zeynep', dosya: 'giy-kr-zeynep', e: '👧' },
-    { id: 'kr-elif',   ad: 'Elif',   dosya: 'giy-kr-elif',   e: '👧' },
-    { id: 'kr-sare',   ad: 'Sare',   dosya: 'giy-kr-sare',   e: '👧' }
+  /* ---------- karakterler ----------
+     NOT: Lina ve Sare görselleri soluk/beyaz saçlı üretilmiş; çocuk
+     karakteri gibi durmuyorlar. Yeni görseller gelene kadar listede
+     yoklar (aktif:false). Görsel yenilenince aktif:true yapmak yeter. */
+  const KARAKTER_TUM = [
+    { id: 'kr-mina',   ad: 'Mina',   dosya: 'giy-kr-mina',   e: '👧', aktif: true },
+    { id: 'kr-lina',   ad: 'Lina',   dosya: 'giy-kr-lina',   e: '👧', aktif: false },
+    { id: 'kr-zeynep', ad: 'Zeynep', dosya: 'giy-kr-zeynep', e: '👧', aktif: true },
+    { id: 'kr-elif',   ad: 'Elif',   dosya: 'giy-kr-elif',   e: '👧', aktif: true },
+    { id: 'kr-sare',   ad: 'Sare',   dosya: 'giy-kr-sare',   e: '👧', aktif: false }
   ];
+  const KARAKTER = KARAKTER_TUM.filter(k => k.aktif);
 
-  /* ---------- katman yerleşimi (sahne yüzdesi) ---------- */
-  /* Konumlar gerçek görsellerin alfa sınırlarına göre hesaplandı.
-     h = sahne yüksekliğinin yüzdesi; genişlik otomatik (oran korunur). */
+  /* ---------- katman yerleşimi ----------
+     Ölçüler KARAKTERİN kendi kutusuna göredir (sahneye göre değil).
+     Karakter çiziminin anatomisi ölçülerek bulundu (507x760 üzerinde):
+       baş üstü %2 · başın en geniş yeri %20 · BOYUN %29
+       omuz %32 · bel %70 · bilek %93 · ayak altı %98
+
+     tam:true  -> görsel karakterle birebir aynı çerçeveye çizilmiş
+                  (eşarp ve namazlık böyle); olduğu gibi bindirilir.
+     tam:false -> görsel ürün fotoğrafı; içeriğine kırpıldı ve
+                  aşağıdaki anatomik banda oturtulur.
+     top/h  = karakter kutusunun yüzdesi, w = karakter kutusu genişliğinin
+     yüzdesi. Genişlik verilirse yükseklik orandan hesaplanır.          */
   const KATMAN = {
-    namazlik: { top: 3,  left: 50, h: 93, z: 7, bolge: [0, 96],   ad: 'Namaz örtüsü', e: '🧎' },
-    esarp:    { top: -2, left: 50, h: 58, z: 5, bolge: [0, 34],   ad: 'Eşarp',        e: '🧕' },
-    elbise:   { top: 21, left: 50, h: 70, z: 2, bolge: [34, 74],  ad: 'Elbise',       e: '👗' },
-    dis:      { top: 16, left: 50, h: 72, z: 3, bolge: [34, 74],  ad: 'Dış giyim',    e: '🧥' },
-    ayakkabi: { top: 76, left: 50, h: 24, z: 4, bolge: [82, 100], ad: 'Ayakkabı',     e: '👟' },
-    canta:    { top: 46, left: 73, h: 26, z: 6, bolge: [74, 82],  ad: 'Çanta',        e: '👜' },
-    aksesuar: { top: 27, left: 50, h: 17, z: 8, bolge: [22, 34],  ad: 'Aksesuar',     e: '🎀' }
+    /* Namaz örtüsü ve eşarp karakterle aynı çerçevede çizildi */
+    namazlik: { tam: true, z: 7, bolge: [0, 96],   ad: 'Namaz örtüsü', e: '🧎' },
+    esarp:    { tam: true, z: 5, bolge: [0, 32],   ad: 'Eşarp',        e: '🧕' },
+    /* Boyundan (%29) ayak bileğine (%95) — yüzü asla kapatmaz */
+    elbise:   { top: 28, left: 50, h: 67, z: 2, bolge: [32, 72], ad: 'Elbise',    e: '👗' },
+    /* Hırka/mont: omuzdan diz üstüne */
+    dis:      { top: 29, left: 50, h: 56, z: 3, bolge: [32, 72], ad: 'Dış giyim', e: '🧥' },
+    /* Ayakkabı: bilekten ayak altına, genişlik omuzdan dar */
+    ayakkabi: { top: 86, left: 50, w: 26, z: 4, bolge: [86, 100], ad: 'Ayakkabı', e: '👟' },
+    /* Çanta: yandan sarkar, belden kalçaya */
+    canta:    { top: 46, left: 78, h: 24, z: 6, bolge: [72, 86],  ad: 'Çanta',    e: '👜' },
+    aksesuar: { top: 30, left: 50, h: 14, z: 8, bolge: [22, 32],  ad: 'Aksesuar', e: '🎀' }
+  };
+
+  /* Aksesuarlar birbirinden çok farklı: bere başa, kemer bele,
+     broş göğse, şal omuza gider. Her biri kendi yerine otursun. */
+  const AKSESUAR_YERI = {
+    'giy-aks-bere':  { top: -3, left: 50, w: 40 },   /* baş üstü */
+    'giy-aks-sal':   { top: 30, left: 50, w: 62 },   /* omuz     */
+    'giy-aks-kemer': { top: 62, left: 50, w: 40 },   /* bel      */
+    'giy-aks-bros':  { top: 36, left: 60, w: 13 }    /* göğüs    */
   };
 
   /* ---------- parça rafları ---------- */
@@ -242,7 +269,49 @@ window.GameGiydirme = (function () {
     katmanEl = {};
     sekmeCiz(); rafCiz(); hedefCiz();
     ctx.options.querySelector('#giyHazir').addEventListener('click', hazir);
+    katmanKutusuHizala();
+    requestAnimationFrame(katmanKutusuHizala);
   }
+
+  /* ---------- katman kutusunu karaktere oturt ----------
+     Kıyafet katmanlarının top/height değerleri karakter çiziminin
+     kendisine göre ölçüldü (507x760). Ama kutu sahnenin TAMAMINI
+     kaplıyordu; sahne genişleyip karakter küçülünce kıyafet yukarı
+     kayıp YÜZÜ KAPATIYORDU. Artık kutu, karakterin ekranda gerçekten
+     kapladığı dikdörtgene birebir oturuyor.                          */
+  const KR_EN = 507, KR_BOY = 760;   /* karakter çiziminin ölçüsü */
+
+  function katmanKutusuHizala() {
+    if (!sahneEl || !ctx) return;
+    const kap = ctx.options.querySelector('#giyKatman');
+    const hedef = ctx.options.querySelector('#giyHedef');
+    if (!kap) return;
+    const s = sahneEl.getBoundingClientRect();
+    if (!s.height) return;
+    /* .giy-taban kuralı: height:94%, width:auto, max-width:90% */
+    let boy = s.height * 0.94;
+    let en = boy * (KR_EN / KR_BOY);
+    const enSinir = s.width * 0.90;
+    if (en > enSinir) { en = enSinir; boy = en * (KR_BOY / KR_EN); }
+    const ust = s.height * 0.03;
+    const sol = (s.width - en) / 2;
+    [kap, hedef].forEach(el => {
+      if (!el) return;
+      el.style.left = sol + 'px';
+      el.style.top = ust + 'px';
+      el.style.width = en + 'px';
+      el.style.height = boy + 'px';
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
+    });
+  }
+
+  /* Ekran döndüğünde / boyut değişince yeniden hizala */
+  let hizaZaman = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(hizaZaman);
+    hizaZaman = setTimeout(katmanKutusuHizala, 120);
+  });
 
   function hedefCiz() {
     const g = gorevler[gi];
@@ -348,28 +417,38 @@ window.GameGiydirme = (function () {
     const { p, anahtar } = surukle;
     const r = sahneEl.getBoundingClientRect();
     const icinde = x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
-    if (!icinde) { Snd.sfx.whoosh(); return; }
 
-    // bölgeler çakışabiliyor; taşınan parçanın kendi bölgesi içindeyse kabul
-    const oran = (y - r.top) / r.height * 100;
-    const [b1, b2] = KATMAN[anahtar].bolge;
-    if (oran >= b1 && oran <= b2) { giydir(anahtar, p); return; }
-
-    Snd.sfx.wrong(); ctx.oops(); Snd.duck(2400);
-    const yer = { esarp: 'başına', elbise: 'üstüne', dis: 'üstüne', ayakkabi: 'ayağına',
-                  canta: 'eline', aksesuar: 'üstüne', namazlik: 'başından aşağı' }[anahtar];
-    Snd.say({ id: 'giy-yanlis-' + anahtar, text: `${KATMAN[anahtar].ad} ${yer} gider. Bir daha dene!` });
-    const ip = ctx.options.querySelector('#giyIpucu');
-    if (ip) {
-      ip.textContent = `${KATMAN[anahtar].ad} ${yer} gider 👆`;
-      ip.classList.add('uyari');
-      setTimeout(() => {
-        ip.textContent = `Parçayı tut, ${karakter.ad}'ın üstüne bırak`;
-        ip.classList.remove('uyari');
-      }, 2600);
+    /* 4 yaşındaki bir çocuk parçayı milimetrik yere bırakamaz.
+       Sahnenin HERHANGİ bir yerine bıraktıysa kıyafet giydirilir ve
+       zaten doğru yerine (boynuna, ayağına) kendisi oturur. Ceza yok. */
+    if (icinde) {
+      giydir(anahtar, p);
+      const yer = { esarp: 'başına', elbise: 'üstüne', dis: 'üstüne', ayakkabi: 'ayağına',
+                    canta: 'koluna', aksesuar: 'üstüne', namazlik: 'başından aşağı' }[anahtar];
+      const ip = ctx.options.querySelector('#giyIpucu');
+      if (ip) {
+        ip.textContent = `${KATMAN[anahtar].ad} ${yer} gitti ✨`;
+        setTimeout(() => {
+          if (ip.isConnected) ip.textContent = `Parçayı tut, ${karakter.ad}'ın üstüne bırak`;
+        }, 1800);
+      }
+      return;
     }
+
+    /* Sahnenin tamamen dışına bırakıldı: sessizce geri döner. */
+    Snd.sfx.whoosh();
     const hk = ctx.options.querySelector(`.hedef-kutu[data-a="${anahtar}"]`);
-    if (hk) { hk.classList.add('goster'); setTimeout(() => hk.classList.remove('goster'), 2200); }
+    if (hk) { hk.classList.add('goster'); setTimeout(() => hk.classList.remove('goster'), 1800); }
+  }
+
+  /* Bir parçanın karakter üstündeki yerleşim kuralını üretir. */
+  function yerlesim(anahtar, p) {
+    const k = KATMAN[anahtar];
+    if (k.tam) return `inset:0;z-index:${k.z}`;           /* karakterle birebir */
+    const ozel = (anahtar === 'aksesuar' && p && AKSESUAR_YERI[p.dosya]) || null;
+    const y = ozel || k;
+    const boyut = y.w != null ? `width:${y.w}%;height:auto` : `height:${y.h}%;width:auto`;
+    return `top:${y.top}%;left:${y.left}%;${boyut};z-index:${k.z}`;
   }
 
   function giydir(anahtar, p) {
@@ -380,10 +459,12 @@ window.GameGiydirme = (function () {
     if (!el) {
       el = document.createElement('div');
       el.className = 'giy-katman k-' + anahtar;
-      el.style.cssText = `top:${k.top}%;left:${k.left}%;height:${k.h}%;z-index:${k.z}`;
       kap.appendChild(el);
       katmanEl[anahtar] = el;
     }
+    /* Yerleşim her parçada yeniden hesaplanır — bere ile kemer aynı
+       rafta ama bambaşka yerlere gider. */
+    el.style.cssText = yerlesim(anahtar, p);
     el.innerHTML = p.dosya ? parcaGorsel(anahtar, p, 'katman-img') : '';
     el.classList.remove('giydi'); void el.offsetWidth; el.classList.add('giydi');
 

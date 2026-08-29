@@ -42,7 +42,7 @@ window.GameLetters = (function () {
     ctx.options.style.gridTemplateColumns = '';
     ctx.say({ id: 'sys-oyun-harf', text: 'Harfleri yerine koyalım!' });
     ctx.duck(2600);
-    setTimeout(kur, 2700);
+    setTimeout(kur, 300);
   }
 
   function kur() {

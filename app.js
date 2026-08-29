@@ -308,24 +308,50 @@
     $('#progressFill').style.width = (cur / total * 100) + '%';
   }
 
+  /* Her oyun açılışı yeni bir "tur" numarası alır. Önceki oyunun
+     gecikmeli kodu (setTimeout ile gelen) bu numarayı taşımıyorsa
+     ekrana hiçbir şey yazamaz. Yoksa Alya yeni oyunu açtığında
+     saniyelerce ESKİ oyunun sorusunu görüyor, hatta ona dokunuyordu. */
+  let tur = 0;
+  let acilisTimer = null;
+  const turGecerli = t => t === tur;
+
+  /* Ekranı anında temizle; eski oyunun kartları bir an bile kalmasın. */
+  function ekraniTemizle() {
+    clearTimeout(acilisTimer);
+    promptArea.innerHTML = '';
+    optionsArea.className = 'options-area yukleniyor-alan';
+    optionsArea.style.gridTemplateColumns = '';
+    optionsArea.innerHTML = '<div class="yukleniyor"><span></span><span></span><span></span></div>';
+    $('#progressFill').style.width = '0%';
+    $('#progressLabel').textContent = '';
+  }
+
   function startGame(id) {
     G = GAMES[id];
     if (!G) return;
+    tur++;
+    const buTur = tur;
     tanitDur();
+    Snd.stopVoice();
+    FX.clear();
     qi = 0; correctFirst = 0;
+    ekraniTemizle();
     show('game');
     const kat = oyunKategorisi(id);
     Mascot.set(gameCat, MINA_KATEGORI.includes(kat) ? 'mina' : 'kedi', 'idle');
-    optionsArea.className = 'options-area';
-    optionsArea.style.gridTemplateColumns = '';
     $('#repeatBtn').style.visibility = G.mode === 'custom' ? 'hidden' : 'visible';
 
     if (G.mode === 'custom') {
+      optionsArea.className = 'options-area';
+      optionsArea.innerHTML = '';
       G.mount({
         prompt: promptArea, options: optionsArea,
-        setProgress, say: Snd.say, duck: Snd.duck,
+        setProgress, duck: Snd.duck,
+        say: (s, o) => { if (turGecerli(buTur)) Snd.say(s, o); },
         happy: catHappy, oops: catOops,
-        finish: customFinish
+        finish: (yildiz, alt) => { if (turGecerli(buTur)) customFinish(yildiz, alt); },
+        gecerli: () => turGecerli(buTur)
       });
       return;
     }
@@ -333,7 +359,7 @@
     G.start();
     Snd.say(G.intro);
     Snd.duck(1500);
-    setTimeout(nextQuestion, 1400);
+    acilisTimer = setTimeout(() => { if (turGecerli(buTur)) nextQuestion(); }, 350);
   }
 
   /* ---------- Seçenek kartı: DİNLE + SEÇ ----------
@@ -503,7 +529,15 @@
   /* ---------- butonlar ---------- */
   function eveDon() {
     tanitDur();
+    /* Turu ilerlet: bu oyunun bekleyen hiçbir gecikmeli kodu artık
+       ekrana yazamaz. Aksi halde menüdeyken oyun ekranı çiziliyordu. */
+    tur++;
+    clearTimeout(acilisTimer);
     Snd.stopVoice(); Snd.sfx.tap(); FX.clear();
+    promptArea.innerHTML = '';
+    optionsArea.innerHTML = '';
+    optionsArea.className = 'options-area';
+    optionsArea.style.gridTemplateColumns = '';
     if (acikKategori) openCategory(acikKategori);
     show('menu');
   }

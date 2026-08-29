@@ -181,7 +181,7 @@ window.Motor = (function () {
       mount(c) {
         ctx = c; tur = 0; yapilan = 0; hata = 0;
         ctx.say(cfg.intro); ctx.duck(2200);
-        setTimeout(kur, 2300);
+        setTimeout(kur, 300);
       }
     };
   }

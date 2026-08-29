@@ -56,7 +56,7 @@ window.GameToplan = (function () {
     ctx.options.style.gridTemplateColumns = '';
     ctx.say({ id: 'sys-oyun-toplan', text: 'Oda dağılmış! Eşyaları tutup doğru yerine bırakalım.' });
     ctx.duck(3600);
-    setTimeout(kur, 3700);
+    setTimeout(kur, 300);
   }
 
   function kur() {

@@ -23,7 +23,7 @@ window.MotorRutin = function (cfg) {
     ctx.options.style.gridTemplateColumns = '';
     ctx.say(cfg.intro);
     ctx.duck(3000);
-    setTimeout(kur, 3100);
+    setTimeout(kur, 300);
   }
 
   function kur() {

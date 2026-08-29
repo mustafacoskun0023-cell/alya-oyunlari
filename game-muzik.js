@@ -83,7 +83,7 @@ window.GameMuzik = (function () {
     ctx.options.style.gridTemplateColumns = '';
     ctx.say({ id: 'sys-oyun-muzik', text: 'Müzisyenleri sahneye taşı, kendi şarkını yap!' });
     ctx.duck(3400);
-    setTimeout(kur, 3500);
+    setTimeout(kur, 300);
   }
 
   function kur() {

@@ -18,7 +18,7 @@ window.GameAbdest = (function () {
     ctx = c; tur = 0; yapilan = 0; hata = 0;
     ctx.say({ id: 'sys-oyun-abdest', text: 'Abdest nasıl alınır? Sırayla dizelim!' });
     ctx.duck(2000);
-    setTimeout(kur, 2100);
+    setTimeout(kur, 300);
   }
 
   function kur() {

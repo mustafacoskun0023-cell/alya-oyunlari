@@ -21,7 +21,7 @@ window.GameDis = (function () {
     ctx = c; bolum = 0; yapilan = 0; hata = 0;
     ctx.say({ id:'sys-oyun-dis', text:'Dişlerimizi nasıl fırçalarız? Hadi öğrenelim!' });
     ctx.duck(2200);
-    setTimeout(hazirlikKur, 2300);
+    setTimeout(hazirlikKur, 300);
   }
 
   /* ---------- 1 & 3: sıralama bölümleri ---------- */
