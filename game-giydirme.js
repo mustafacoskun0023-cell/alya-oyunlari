@@ -35,27 +35,33 @@ window.GameGiydirme = (function () {
      top/h  = karakter kutusunun yüzdesi, w = karakter kutusu genişliğinin
      yüzdesi. Genişlik verilirse yükseklik orandan hesaplanır.          */
   const KATMAN = {
-    /* Namaz örtüsü ve eşarp karakterle aynı çerçevede çizildi */
-    namazlik: { tam: true, z: 7, bolge: [0, 96],   ad: 'Namaz örtüsü', e: '🧎' },
-    esarp:    { tam: true, z: 5, bolge: [0, 32],   ad: 'Eşarp',        e: '🧕' },
+    /* Namaz örtüsü ve eşarp karakterle aynı çerçevede çizildi.
+       Namaz örtülerinin yüz açıklığı görsellerde başın tepesine denk
+       geliyordu; +%6 aşağı kaydırınca yüz delikten görünüyor
+       (Zeynep üstünde 4 örtü x 4 ayar bindirilerek doğrulandı).     */
+    namazlik: { tam: true, dy: 6, z: 7, bolge: [0, 96], ad: 'Namaz örtüsü', e: '🧎' },
+    esarp:    { tam: true, dy: 0, z: 5, bolge: [0, 32], ad: 'Eşarp',        e: '🧕' },
     /* Boyundan (%29) ayak bileğine (%95) — yüzü asla kapatmaz */
     elbise:   { top: 28, left: 50, h: 67, z: 2, bolge: [32, 72], ad: 'Elbise',    e: '👗' },
     /* Hırka/mont: omuzdan diz üstüne */
-    dis:      { top: 29, left: 50, h: 56, z: 3, bolge: [32, 72], ad: 'Dış giyim', e: '🧥' },
-    /* Ayakkabı: bilekten ayak altına, genişlik omuzdan dar */
-    ayakkabi: { top: 86, left: 50, w: 26, z: 4, bolge: [86, 100], ad: 'Ayakkabı', e: '👟' },
-    /* Çanta: yandan sarkar, belden kalçaya */
-    canta:    { top: 46, left: 78, h: 24, z: 6, bolge: [72, 86],  ad: 'Çanta',    e: '👜' },
-    aksesuar: { top: 30, left: 50, h: 14, z: 8, bolge: [22, 32],  ad: 'Aksesuar', e: '🎀' }
+    dis:      { top: 29, left: 50, h: 56, z: 4, bolge: [32, 72], ad: 'Dış giyim', e: '🧥' },
+    /* Ayakkabı: ELBİSENİN ALTINDA (z:1) — etek ucundan burunları görünür,
+       gerçekte olduğu gibi. Elbise yokken de ayaktadır.               */
+    ayakkabi: { top: 87, left: 50, w: 30, z: 1, bolge: [86, 100], ad: 'Ayakkabı', e: '👟' },
+    /* Çanta: elin hizasında, kalçada sarkar (havada uçmaz) */
+    canta:    { top: 50, left: 68, h: 18, z: 6, bolge: [40, 80],  ad: 'Çanta',    e: '👜' },
+    aksesuar: { top: 30, left: 50, h: 14, z: 8, bolge: [22, 60],  ad: 'Aksesuar', e: '🎀' }
   };
 
   /* Aksesuarlar birbirinden çok farklı: bere başa, kemer bele,
-     broş göğse, şal omuza gider. Her biri kendi yerine otursun. */
+     broş göğse, şal omuza gider. Her biri kendi yerine otursun.
+     z verilirse katmanın varsayılan z'sini ezer (kemer elbisenin
+     üstünde ama eşarbın/dış giyimin ALTINDA durmalı).              */
   const AKSESUAR_YERI = {
-    'giy-aks-bere':  { top: -3, left: 50, w: 40 },   /* baş üstü */
-    'giy-aks-sal':   { top: 30, left: 50, w: 62 },   /* omuz     */
-    'giy-aks-kemer': { top: 62, left: 50, w: 40 },   /* bel      */
-    'giy-aks-bros':  { top: 36, left: 60, w: 13 }    /* göğüs    */
+    'giy-aks-bere':  { top: -9, left: 50, w: 27 },           /* baş üstü */
+    'giy-aks-kemer': { top: 45, left: 50, w: 20, z: 3 },   /* bel      */
+    'giy-aks-sal':   { top: 30, left: 50, w: 62 },           /* omuz     */
+    'giy-aks-bros':  { top: 36, left: 60, w: 13 }            /* göğüs    */
   };
 
   /* ---------- parça rafları ---------- */
@@ -444,11 +450,16 @@ window.GameGiydirme = (function () {
   /* Bir parçanın karakter üstündeki yerleşim kuralını üretir. */
   function yerlesim(anahtar, p) {
     const k = KATMAN[anahtar];
-    if (k.tam) return `inset:0;z-index:${k.z}`;           /* karakterle birebir */
+    if (k.tam) {
+      /* Karakterle birebir çerçeve; dy varsa aşağı kaydır (namaz örtüsü) */
+      const kaydir = k.dy ? `transform:translateY(${k.dy}%);` : '';
+      return `inset:0;${kaydir}z-index:${k.z}`;
+    }
     const ozel = (anahtar === 'aksesuar' && p && AKSESUAR_YERI[p.dosya]) || null;
     const y = ozel || k;
     const boyut = y.w != null ? `width:${y.w}%;height:auto` : `height:${y.h}%;width:auto`;
-    return `top:${y.top}%;left:${y.left}%;${boyut};z-index:${k.z}`;
+    const z = y.z != null ? y.z : k.z;
+    return `top:${y.top}%;left:${y.left}%;${boyut};z-index:${z}`;
   }
 
   function giydir(anahtar, p) {
@@ -473,10 +484,35 @@ window.GameGiydirme = (function () {
     FX.confetti(24, r.left + r.width / 2, r.top + r.height / 2);
     sekmeCiz(); rafCiz();
 
+    /* Sago Mini mekaniği: karakter yeni kıyafetine SEVİNİR.
+       Küçük bir zıplama + parça adını söyleme — çocuk yaptığının
+       karşılığını anında görür ve duyar.                          */
+    const taban = ctx.options.querySelector('.giy-taban');
+    if (taban) {
+      taban.classList.remove('sevinc'); void taban.offsetWidth;
+      taban.classList.add('sevinc');
+    }
+    /* Kayıtlı övgü kliplerinden biri: 'Çok güzel!', 'Harikasın!'…
+       (parçanın adı zaten tutarken okunuyor; burada sevinç sesi) */
+    if (p.dosya) {
+      const ovgu = 1 + Math.floor(Math.random() * 7);
+      Snd.say({ id: 'ovgu-' + ovgu, text: ['', 'Aferin Alya!', 'Harikasın!', 'Çok güzel!', 'Bravo!', 'Süpersin Alya!', 'Mükemmel!', 'Çok iyi!'][ovgu] });
+    }
+
     const g = gorevler[gi];
     const tamam = g.gerek.every(a => giyili[a]);
     const hz = ctx.options.querySelector('#giyHazir');
     if (hz) hz.classList.toggle('parla', tamam);
+    if (tamam) {
+      /* Kombin tamam: karakter büyük sevinç, Hazır düğmesi göz kırpar */
+      ctx.happy();
+      if (taban) {
+        setTimeout(() => {
+          taban.classList.remove('sevinc'); void taban.offsetWidth;
+          taban.classList.add('sevinc');
+        }, 500);
+      }
+    }
   }
 
   function hazir() {
