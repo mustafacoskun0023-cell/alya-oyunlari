@@ -47,10 +47,22 @@ window.GameGiydirme = (function () {
     dis:      { top: 29, left: 50, h: 56, z: 4, bolge: [32, 72], ad: 'Dış giyim', e: '🧥' },
     /* Ayakkabı: ELBİSENİN ALTINDA (z:1) — etek ucundan burunları görünür,
        gerçekte olduğu gibi. Elbise yokken de ayaktadır.               */
-    ayakkabi: { top: 87, left: 50, w: 30, z: 1, bolge: [86, 100], ad: 'Ayakkabı', e: '👟' },
+    ayakkabi: { top: 87, left: 50, h: 12, z: 1, bolge: [86, 100], ad: 'Ayakkabı', e: '👟' },
     /* Çanta: elin hizasında, kalçada sarkar (havada uçmaz) */
     canta:    { top: 50, left: 68, h: 18, z: 6, bolge: [40, 80],  ad: 'Çanta',    e: '👜' },
     aksesuar: { top: 30, left: 50, h: 14, z: 8, bolge: [22, 60],  ad: 'Aksesuar', e: '🎀' }
+  };
+
+  /* Her eşarbın yüz deliği farklı yükseklikte çizilmiş (AI üretimi).
+     Deliğin ÜST kenarı ölçüldü; hepsi pembe eşarbın hizasına (%10)
+     çekiliyor ki kumaş kenarı hiçbirinde GÖZLERE inmesin.           */
+  const ESARP_DY = {
+    'giy-esarp-beyaz':   -5,
+    'giy-esarp-cicekli': -1.7,
+    'giy-esarp-krem':    -3.8,
+    'giy-esarp-lila':    -4.3,
+    'giy-esarp-mavi':    -4.6,
+    'giy-esarp-mint':    -5
   };
 
   /* Aksesuarlar birbirinden çok farklı: bere başa, kemer bele,
@@ -447,12 +459,43 @@ window.GameGiydirme = (function () {
     if (hk) { hk.classList.add('goster'); setTimeout(() => hk.classList.remove('goster'), 1800); }
   }
 
+  /* ---------- katman uyumu ----------
+     Eşarp/namazlık khimar tarzı: gövdeyi de örtüyor. Örtü giyiliyken
+     1) elbise ve dış giyimin YAKASI yüz deliğinden sızıp karmaşa
+        yaratıyordu -> üstten kliplenir, delikte yalnız yüz kalır;
+        etekleri örtünün altından yine görünür.
+     2) çanta örtünün ortasına yapışıyordu -> ele, kenara kayar.
+     Örtü çıkarsa her şey normal yerine döner. (PIL'de A/B/C varyant
+     karşılaştırmasıyla seçildi.)                                    */
+  function katmanUyumu() {
+    /* Eşarplar artık referanstaki gibi: başı ve omuzları sarar,
+       gövdeyi ÖRTMEZ (görseller omuz hizasında yumuşak uçla bitecek
+       şekilde dönüştürüldü) — elbise, kemer, çanta hep görünür.
+       Tam boy olan tek örtü NAMAZ ÖRTÜSÜ; uyum kuralları ona özel. */
+    const ortulu = !!giyili.namazlik;
+    [['elbise', 30], ['dis', 34]].forEach(([a, k]) => {
+      const img = katmanEl[a] && katmanEl[a].querySelector('.katman-img');
+      if (img) img.style.clipPath = ortulu ? `inset(${k}% 0 0 0)` : '';
+    });
+    const c = katmanEl.canta;
+    if (c && giyili.canta && giyili.canta !== 'giy-canta-yok') {
+      c.style.left = (ortulu ? 75 : KATMAN.canta.left) + '%';
+      c.style.top = (ortulu ? 57 : KATMAN.canta.top) + '%';
+      c.style.height = (ortulu ? 15 : KATMAN.canta.h) + '%';
+    }
+    /* Namaz örtüsü üstüne kemer takılmaz */
+    const aks = katmanEl.aksesuar;
+    if (aks) aks.style.display = (ortulu && giyili.aksesuar === 'giy-aks-kemer') ? 'none' : '';
+  }
+
   /* Bir parçanın karakter üstündeki yerleşim kuralını üretir. */
   function yerlesim(anahtar, p) {
     const k = KATMAN[anahtar];
     if (k.tam) {
-      /* Karakterle birebir çerçeve; dy varsa aşağı kaydır (namaz örtüsü) */
-      const kaydir = k.dy ? `transform:translateY(${k.dy}%);` : '';
+      /* Karakterle birebir çerçeve. dy: katmanın genel kaydırması
+         (namaz örtüsü +6) + parçaya özel eşarp düzeltmesi.          */
+      const dy = (k.dy || 0) + ((p && ESARP_DY[p.dosya]) || 0);
+      const kaydir = dy ? `transform:translateY(${dy}%);` : '';
       return `inset:0;${kaydir}z-index:${k.z}`;
     }
     const ozel = (anahtar === 'aksesuar' && p && AKSESUAR_YERI[p.dosya]) || null;
@@ -478,6 +521,7 @@ window.GameGiydirme = (function () {
     el.style.cssText = yerlesim(anahtar, p);
     el.innerHTML = p.dosya ? parcaGorsel(anahtar, p, 'katman-img') : '';
     el.classList.remove('giydi'); void el.offsetWidth; el.classList.add('giydi');
+    katmanUyumu();
 
     Snd.sfx.correct();
     const r = el.getBoundingClientRect();
