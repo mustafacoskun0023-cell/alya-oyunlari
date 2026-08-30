@@ -1376,3 +1376,137 @@ body::before{
   55%{transform:scale(1.35) rotate(7deg);opacity:1}
   100%{transform:scale(1.12) rotate(0)}
 }
+
+/* ===================== v13 · giydirme mobil erişilebilirlik =====================
+   Sorun: .parca üzerinde touch-action:none + pointerdown preventDefault vardı;
+   parmak bir kartın üstüne düştüğü anda rafın kendi kaydırması ölüyordu ve
+   ilk satırdan sonraki parçalara ULAŞILAMIYORDU. Artık dokunmatikte sürükleme
+   yok (tek dokunuş giydiriyor), dolayısıyla kaydırma serbest bırakıldı. */
+.parca{ touch-action:manipulation; cursor:pointer; }
+.raf-parcalar{ touch-action:pan-y; }
+.raf-sekme{ touch-action:pan-x; }
+
+/* Uçuş animasyonu: dokunulan parça karakterin üstüne süzülür */
+.giy-ucus{
+  position:fixed; z-index:60; pointer-events:none; opacity:1;
+  transition:transform .3s cubic-bezier(.35,.05,.3,1), opacity .3s ease;
+  filter:drop-shadow(0 8px 14px rgba(43,27,84,.4));
+}
+.ucus-img{ width:100%; height:100%; object-fit:contain; }
+.ucus-img.yedek-e{ display:grid; place-items:center; font-size:clamp(30px,7vh,64px); }
+
+/* Kategori sekmeleri: sığmayınca ikinci satıra insin, parmak boyunda kalsın */
+.raf-sekme{
+  display:flex; flex-wrap:wrap; gap:6px;
+}
+.raf-btn{
+  flex:1 1 auto; min-width:clamp(56px,15.5vw,120px); min-height:52px;
+  justify-content:center;
+}
+
+/* Parça kartları: en küçük telefonda bile 72px'in altına inmesin */
+.raf-parcalar{
+  grid-template-columns:repeat(auto-fill,minmax(clamp(72px,11vh,108px),1fr));
+}
+
+/* Dikey (telefon/tablet portre): rafa daha çok yer ver, sahne biraz kısalsın */
+@media (orientation:portrait){
+  .options-area.giydirme{ grid-template-rows:minmax(0,1fr) minmax(0,1.18fr); }
+  .giy-panel{ padding:clamp(6px,1.2vh,14px); gap:clamp(4px,.8vh,8px); }
+  .raf-btn{ min-height:48px; padding:4px 2px; }
+  .raf-e{ font-size:clamp(18px,2.9vh,28px); }
+}
+
+/* Dar telefon dikey: sekme yazısı taşmasın */
+@media (max-width:420px){
+  .raf-ad{ font-size:11px; letter-spacing:-.2px; }
+  .raf-btn{ border-width:2px; }
+}
+
+/* Rafta aşağıda daha çok parça olduğunu belli eden yumuşak gölge */
+.giy-panel{ position:relative; }
+.raf-parcalar::after{ content:''; display:block; height:2px; }
+
+@media (prefers-reduced-motion:reduce){
+  .giy-ucus{ transition:none; }
+}
+
+/* Rafta devamı olduğunu gösteren yumuşak soluklaşma + ok */
+.giy-panel.kaydirilir .raf-parcalar{
+  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 26px),rgba(0,0,0,.15));
+          mask-image:linear-gradient(to bottom,#000 calc(100% - 26px),rgba(0,0,0,.15));
+}
+.giy-panel.kaydirilir .raf-parcalar::after{
+  content:'⌄'; position:sticky; bottom:0; grid-column:1/-1;
+  text-align:center; font-size:20px; font-weight:900; color:#8B7BC8;
+  height:auto; line-height:.9; animation:kayOk 1.6s ease-in-out infinite;
+}
+@keyframes kayOk{0%,100%{transform:translateY(0);opacity:.55}50%{transform:translateY(3px);opacity:1}}
+@media (prefers-reduced-motion:reduce){ .giy-panel.kaydirilir .raf-parcalar::after{animation:none} }
+
+/* ============ v13 · dar telefon dikey: raf = yatay kaydırmalı büyük şerit ============
+   Dikeyde 2 satır sekme + ipucu + Hazır butonu, küçük telefonlarda rafa tek bir
+   kart satırı bile bırakmıyordu. Bu boyda raf yatay bir şeride dönüşür:
+   kartlar büyük kalır, sağda yarım görünen kart "devamı var" der. */
+@media (orientation:portrait) and (max-width:560px){
+  /* panel tam ihtiyacı kadar yer alsın, kalanı sahneye kalsın */
+  .options-area.giydirme{ grid-template-rows:minmax(0,1fr) auto; }
+  .giy-panel{ padding:8px 8px 6px; gap:5px; }
+  .raf-btn{ min-height:46px; padding:3px 2px; gap:0; }
+  .raf-e{ font-size:20px; }
+
+  .raf-parcalar{
+    flex:0 0 auto; height:clamp(84px,24.5vw,120px);
+    display:flex; flex-wrap:nowrap; align-items:center;
+    overflow-x:auto; overflow-y:hidden; touch-action:pan-x;
+    gap:9px; padding:3px 2px;
+    scroll-snap-type:x proximity;
+  }
+  .parca{
+    flex:0 0 clamp(76px,22.5vw,110px); width:clamp(76px,22.5vw,110px);
+    height:100%; aspect-ratio:auto; scroll-snap-align:center;
+  }
+  .giy-ipucu{ font-size:12px; line-height:1.15; }
+  .giy-hazir{ min-height:46px; padding:7px 16px; }
+}
+
+/* yatay şeritte "devamı var" işareti sağda belirir */
+.giy-panel.kaydirilir-x .raf-parcalar{
+  -webkit-mask-image:linear-gradient(to right,#000 calc(100% - 30px),rgba(0,0,0,.18));
+          mask-image:linear-gradient(to right,#000 calc(100% - 30px),rgba(0,0,0,.18));
+}
+.giy-panel.kaydirilir-x::after{
+  content:'›'; position:absolute; right:6px; top:50%; transform:translateY(-50%);
+  font-size:30px; font-weight:900; color:#8B7BC8; pointer-events:none;
+  animation:kayOkX 1.6s ease-in-out infinite;
+}
+@keyframes kayOkX{0%,100%{transform:translateY(-50%) translateX(0);opacity:.5}
+  50%{transform:translateY(-50%) translateX(4px);opacity:1}}
+@media (prefers-reduced-motion:reduce){ .giy-panel.kaydirilir-x::after{animation:none} }
+
+/* Dar telefon: 6 sekme tek satıra sığsın. Alya okuma bilmiyor; yazı yerine
+   büyük emoji yeter, sekmeye dokununca adı zaten sesli söyleniyor. */
+@media (orientation:portrait) and (max-width:480px){
+  .raf-sekme{ flex-wrap:nowrap; gap:5px; }
+  .raf-btn{ min-width:0; flex:1 1 0; min-height:48px; }
+  .raf-ad{ display:none; }
+  .raf-e{ font-size:26px; }
+  .raf-tik{ top:1px; right:3px; font-size:12px; }
+}
+
+/* Eşarp görselleri karakter karesine göre çizili: rafta/uçuşta yakınlaştırılır */
+.parca{ overflow:hidden; }
+.parca-img.esarp-kirp{ transform:scale(1.85) translateY(21%); }
+.hayalet-img.esarp-kirp,.ucus-img.esarp-kirp{ transform:scale(1.7) translateY(20%); }
+
+/* Tam kare katmanlar (eşarp, namazlık) inset:0 ile yerleşir; giydirme
+   animasyonundaki translateX(-50%) onları yarım saniyeliğine karakterin
+   soluna fırlatıyordu. Bu katmanlar transform yerine `scale` ile büyür,
+   böylece inline translateY korunur. */
+@keyframes giydiPopTam{
+  0%{scale:.62;opacity:.25}
+  60%{scale:1.06;opacity:1}
+  100%{scale:1;opacity:1}
+}
+.giy-katman[style*="inset"].giydi{ animation-name:giydiPopTam; }
+@media (prefers-reduced-motion:reduce){ .giy-katman[style*="inset"].giydi{animation:none} }

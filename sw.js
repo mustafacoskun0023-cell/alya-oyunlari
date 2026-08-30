@@ -1,7 +1,7 @@
 /* Alya'nın Oyunları — Service Worker */
 
 /* Uygulama dosyaları: her sürümde yenilenir */
-const CORE_CACHE = 'alya-core-v13.0.0';
+const CORE_CACHE = 'alya-core-v13.1.0';
 /* Ses ve görseller: sürümden bağımsız, bir kez inip kalır */
 const MEDIA_CACHE = 'alya-media-v1';
 
@@ -371,7 +371,9 @@ const YENILENEN_MEDYA = [
   'giy-elbise-bayram','giy-elbise-cicekli','giy-elbise-krem','giy-elbise-lacivert',
   'giy-elbise-lila','giy-elbise-pembe','giy-elbise-rahat','giy-elbise-sari',
   'giy-elbise-tunik','giy-elbise-yesil',
-  'giy-kr-lina','giy-kr-mina','giy-kr-sare','oyun-giydirme'
+  'giy-kr-lina','giy-kr-mina','giy-kr-sare','oyun-giydirme',
+  /* v13: eşarplar ve namaz örtüleri karakterin yüz hizasına göre yeniden çizildi */
+  'giy-nmz-beyaz','giy-nmz-cicekli','giy-nmz-mavi','giy-nmz-pembe'
 ].map(id => './gorseller/' + id + '.webp');
 
 self.addEventListener('activate', e => {

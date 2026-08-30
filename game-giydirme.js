@@ -35,35 +35,28 @@ window.GameGiydirme = (function () {
      top/h  = karakter kutusunun yüzdesi, w = karakter kutusu genişliğinin
      yüzdesi. Genişlik verilirse yükseklik orandan hesaplanır.          */
   const KATMAN = {
-    /* Namaz örtüsü ve eşarp karakterle aynı çerçevede çizildi.
-       Namaz örtülerinin yüz açıklığı görsellerde başın tepesine denk
-       geliyordu; +%6 aşağı kaydırınca yüz delikten görünüyor
-       (Zeynep üstünde 4 örtü x 4 ayar bindirilerek doğrulandı).     */
-    namazlik: { tam: true, dy: 6, z: 7, bolge: [0, 96], ad: 'Namaz örtüsü', e: '🧎' },
-    esarp:    { tam: true, dy: 0, z: 5, bolge: [0, 32], ad: 'Eşarp',        e: '🧕' },
+    /* Namaz örtüsü ve eşarp karakterle aynı çerçevede çizildi; yüz açıklıkları
+       karakterin gerçek yüz hizasına göre yeniden çizildi (v13), bu yüzden
+       artık hiçbir dosyaya dikey düzeltme gerekmiyor.                 */
+    namazlik: { tam: true, dy: 0, z: 8, bolge: [0, 96], ad: 'Namaz örtüsü', e: '🧎' },
+    esarp:    { tam: true, dy: 0, z: 6, bolge: [0, 32], ad: 'Eşarp',        e: '🧕' },
     /* Boyundan (%29) ayak bileğine (%95) — yüzü asla kapatmaz */
     elbise:   { top: 28, left: 50, h: 67, z: 2, bolge: [32, 72], ad: 'Elbise',    e: '👗' },
     /* Hırka/mont: omuzdan diz üstüne */
-    dis:      { top: 29, left: 50, h: 56, z: 4, bolge: [32, 72], ad: 'Dış giyim', e: '🧥' },
-    /* Ayakkabı: ELBİSENİN ALTINDA (z:1) — etek ucundan burunları görünür,
-       gerçekte olduğu gibi. Elbise yokken de ayaktadır.               */
-    ayakkabi: { top: 87, left: 50, h: 12, z: 1, bolge: [86, 100], ad: 'Ayakkabı', e: '👟' },
+    dis:      { top: 29, left: 50, h: 56, z: 5, bolge: [32, 72], ad: 'Dış giyim', e: '🧥' },
+    /* Ayakkabı ELBİSENİN ÜSTÜNDE (z:3): uzun etekli elbiselerde ayakkabının
+       neredeyse tamamı eteğin arkasında kalıyordu; çocuk seçtiği ayakkabıyı
+       göremiyordu. Artık etek ucunun önünde, tam görünür duruyor.     */
+    ayakkabi: { top: 86, left: 50, h: 13, z: 3, bolge: [86, 100], ad: 'Ayakkabı', e: '👟' },
     /* Çanta: elin hizasında, kalçada sarkar (havada uçmaz) */
-    canta:    { top: 50, left: 68, h: 18, z: 6, bolge: [40, 80],  ad: 'Çanta',    e: '👜' },
-    aksesuar: { top: 30, left: 50, h: 14, z: 8, bolge: [22, 60],  ad: 'Aksesuar', e: '🎀' }
+    canta:    { top: 50, left: 68, h: 18, z: 7, bolge: [40, 80],  ad: 'Çanta',    e: '👜' },
+    aksesuar: { top: 30, left: 50, h: 14, z: 9, bolge: [22, 60],  ad: 'Aksesuar', e: '🎀' }
   };
 
   /* Her eşarbın yüz deliği farklı yükseklikte çizilmiş (AI üretimi).
      Deliğin ÜST kenarı ölçüldü; hepsi pembe eşarbın hizasına (%10)
      çekiliyor ki kumaş kenarı hiçbirinde GÖZLERE inmesin.           */
-  const ESARP_DY = {
-    'giy-esarp-beyaz':   -5,
-    'giy-esarp-cicekli': -1.7,
-    'giy-esarp-krem':    -3.8,
-    'giy-esarp-lila':    -4.3,
-    'giy-esarp-mavi':    -4.6,
-    'giy-esarp-mint':    -5
-  };
+  const ESARP_DY = {};   /* eşarplar tek geometride yeniden çizildi; düzeltme gerekmiyor */
 
   /* Aksesuarlar birbirinden çok farklı: bere başa, kemer bele,
      broş göğse, şal omuza gider. Her biri kendi yerine otursun.
@@ -71,8 +64,8 @@ window.GameGiydirme = (function () {
      üstünde ama eşarbın/dış giyimin ALTINDA durmalı).              */
   const AKSESUAR_YERI = {
     'giy-aks-bere':  { top: -9, left: 50, w: 27 },           /* baş üstü */
-    'giy-aks-kemer': { top: 45, left: 50, w: 20, z: 3 },   /* bel      */
-    'giy-aks-sal':   { top: 30, left: 50, w: 62 },           /* omuz     */
+    'giy-aks-kemer': { top: 53, left: 50, w: 22, z: 4 },   /* bel — eşarp eteğinin altında kalmasın */
+    'giy-aks-sal':   { top: 41, left: 50, w: 44 },           /* omuz     */
     'giy-aks-bros':  { top: 36, left: 60, w: 13 }            /* göğüs    */
   };
 
@@ -203,7 +196,7 @@ window.GameGiydirme = (function () {
   const TUR = 6;                      // her oyunda 6 mekan
   let ctx = null, gi = 0, gorevler = [], giyili = {}, acikRaf = 'elbise';
   let karakter = KARAKTER[0];
-  let sahneEl = null, katmanEl = {}, surukle = null, hayalet = null;
+  let sahneEl = null, katmanEl = {}, surukle = null, hayalet = null, gecis = false;
 
   function mount(c) {
     ctx = c; gi = 0; giyili = {};
@@ -247,7 +240,10 @@ window.GameGiydirme = (function () {
   function parcaGorsel(anahtar, p, sinif) {
     const k = KATMAN[anahtar];
     if (!p.dosya) return `<span class="${sinif} yedek-e">✖</span>`;
-    return `<img class="${sinif}" src="${GORSEL}${p.dosya}.webp" alt="" draggable="false"
+    /* Eşarplar tam kare üzerinde çizili (sahnedeki yerinde duruyorlar); rafta
+       ve uçuşta karenin sadece üst yarısını doldurup küçük görünüyorlardı. */
+    const kirp = anahtar === 'esarp' ? ' esarp-kirp' : '';
+    return `<img class="${sinif}${kirp}" src="${GORSEL}${p.dosya}.webp" alt="" draggable="false"
               onerror="this.replaceWith(Object.assign(document.createElement('span'),
                 {className:'${sinif} yedek-e',textContent:'${k.e}'}))">`;
   }
@@ -280,7 +276,7 @@ window.GameGiydirme = (function () {
       <div class="giy-panel">
         <div class="raf-sekme" id="rafSekme"></div>
         <div class="raf-parcalar" id="rafParca"></div>
-        <div class="giy-ipucu" id="giyIpucu">Parçayı tut, ${karakter.ad}'ın üstüne bırak</div>
+        <div class="giy-ipucu" id="giyIpucu">Parçaya dokun, ${karakter.ad} hemen giyinsin ✨</div>
         <button class="pill-btn green giy-hazir" id="giyHazir">✅ Hazır!</button>
       </div>`;
     sahneEl = ctx.options.querySelector('#giySahne');
@@ -350,6 +346,8 @@ window.GameGiydirme = (function () {
       const k = KATMAN[a];
       const b = document.createElement('button');
       b.className = 'raf-btn' + (a === acikRaf ? ' acik' : '') + (giyili[a] ? ' giyildi' : '');
+      b.dataset.a = a;
+      b.setAttribute('aria-label', k.ad);
       b.innerHTML = `<span class="raf-e">${k.e}</span><span class="raf-ad">${k.ad}</span>` +
                     (giyili[a] ? '<span class="raf-tik">✓</span>' : '');
       b.addEventListener('click', () => {
@@ -372,21 +370,56 @@ window.GameGiydirme = (function () {
       tutmaBagla(b, p, acikRaf);
       el.appendChild(b);
     });
+    kaydirmaIsareti(el);
   }
 
-  /* ---------- sürükle & bırak ---------- */
+  /* Raf taşıyorsa panelde aşağı doğru yumuşak bir soluklaşma + ok belirir;
+     yarım kalan satır "bozuk" değil "devamı var" diye okunur. */
+  function kaydirmaIsareti(el) {
+    const panel = el.closest('.giy-panel');
+    if (!panel) return;
+    const guncelle = () => {
+      if (!el.isConnected) return;
+      const yatay = el.scrollWidth - el.clientWidth > 6;
+      if (yatay) {
+        const sonda = el.scrollLeft + el.clientWidth >= el.scrollWidth - 6;
+        panel.classList.toggle('kaydirilir-x', !sonda);
+        panel.classList.remove('kaydirilir');
+      } else {
+        const tasiyor = el.scrollHeight - el.clientHeight > 6;
+        const sonda = el.scrollTop + el.clientHeight >= el.scrollHeight - 6;
+        panel.classList.toggle('kaydirilir', tasiyor && !sonda);
+        panel.classList.remove('kaydirilir-x');
+      }
+    };
+    requestAnimationFrame(guncelle);
+    setTimeout(guncelle, 260);
+    el.onscroll = guncelle;
+  }
+
+  /* ---------- seçim: dokun (asıl yol) + fare ile sürükle (isteğe bağlı) ----------
+     4 yaşındaki bir çocuk için sürükleme zor; üstelik dokunmatikte sürükleme
+     dinleyicisi rafın kendi kaydırmasını yutuyordu ve alttaki parçalara hiç
+     ulaşılamıyordu. Artık: TEK DOKUNUŞ = giydir. Parça karakterin üstüne
+     uçarak gider. Sürükleme yalnız fare ile çalışır, parmakla asla. */
   function tutmaBagla(el, p, anahtar) {
     el.addEventListener('pointerdown', ev => {
-      ev.preventDefault();
-      try { el.setPointerCapture(ev.pointerId); } catch (e) {}
-      surukle = { p, anahtar, x: ev.clientX, y: ev.clientY, tasidi: false, el };
+      const fare = ev.pointerType === 'mouse';
+      surukle = { p, anahtar, x: ev.clientX, y: ev.clientY, tasidi: false, el, fare };
       Snd.duck(1500);
       Snd.say({ id: p.id, text: p.ad });
+      if (fare) { try { el.setPointerCapture(ev.pointerId); } catch (e) {} }
       el.classList.add('tutuluyor');
     });
     el.addEventListener('pointermove', ev => {
       if (!surukle || surukle.el !== el) return;
       const dx = ev.clientX - surukle.x, dy = ev.clientY - surukle.y;
+      if (!surukle.fare) {
+        /* parmak: 12px'ten fazla kaydıysa bu bir kaydırma hareketidir,
+           seçimi iptal et ve rafın kaymasına izin ver. */
+        if (Math.hypot(dx, dy) > 12) { el.classList.remove('tutuluyor'); surukle = null; }
+        return;
+      }
       if (!surukle.tasidi && Math.hypot(dx, dy) < 10) return;
       if (!surukle.tasidi) { surukle.tasidi = true; hayaletYap(p, anahtar); }
       hayaletTasi(ev.clientX, ev.clientY);
@@ -396,10 +429,38 @@ window.GameGiydirme = (function () {
       if (!surukle || surukle.el !== el) return;
       el.classList.remove('tutuluyor');
       if (surukle.tasidi) birak(ev.clientX, ev.clientY);
-      else giydir(anahtar, p);
+      else if (ev.type === 'pointerup') ucurVeGiydir(el, p, anahtar);
       hayaletSil(); surukle = null;
       [...ctx.options.querySelectorAll('.hedef-kutu')].forEach(h => h.classList.remove('aktif'));
     }));
+  }
+
+  /* Dokunulan parça, karakterin üstündeki doğru bölgeye uçar; sonra giydirilir.
+     Sürüklemenin verdiği "ben taşıdım" hissi korunur, zorluğu kalmaz. */
+  function ucurVeGiydir(el, p, anahtar) {
+    if (!sahneEl) { giydir(anahtar, p); return; }
+    const r = el.getBoundingClientRect();
+    const sr = sahneEl.getBoundingClientRect();
+    const [b1, b2] = KATMAN[anahtar].bolge;
+    const hx = sr.left + sr.width * 0.5;
+    const hy = sr.top + sr.height * ((b1 + b2) / 2) / 100;
+
+    const u = document.createElement('div');
+    u.className = 'giy-ucus';
+    u.innerHTML = parcaGorsel(anahtar, p, 'ucus-img');
+    u.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;
+    document.body.appendChild(u);
+    const hk = ctx.options.querySelector(`.hedef-kutu[data-a="${anahtar}"]`);
+    if (hk) hk.classList.add('aktif');
+    requestAnimationFrame(() => {
+      u.style.transform = `translate(${hx - (r.left + r.width / 2)}px,${hy - (r.top + r.height / 2)}px) scale(1.5)`;
+      u.style.opacity = '.2';
+    });
+    setTimeout(() => {
+      u.remove();
+      if (hk) hk.classList.remove('aktif');
+      giydir(anahtar, p);
+    }, 300);
   }
 
   function hayaletYap(p, anahtar) {
@@ -447,7 +508,7 @@ window.GameGiydirme = (function () {
       if (ip) {
         ip.textContent = `${KATMAN[anahtar].ad} ${yer} gitti ✨`;
         setTimeout(() => {
-          if (ip.isConnected) ip.textContent = `Parçayı tut, ${karakter.ad}'ın üstüne bırak`;
+          if (ip.isConnected) ip.textContent = `Parçaya dokun, ${karakter.ad} hemen giyinsin ✨`;
         }, 1800);
       }
       return;
@@ -560,6 +621,9 @@ window.GameGiydirme = (function () {
   }
 
   function hazir() {
+    /* Çocuk heyecanla iki kez basarsa görev atlanmasın, ders balonu takılı
+       kalmasın: geçiş bitene kadar düğme etkisiz. */
+    if (gecis) return;
     const g = gorevler[gi];
     const eksik = g.gerek.filter(a => !giyili[a]);
     if (eksik.length) {
@@ -584,9 +648,11 @@ window.GameGiydirme = (function () {
     ctx.prompt.appendChild(kutu);
     sahneEl.classList.add('kutlama');
 
+    gecis = true;
     gi++;
     ctx.setProgress(gi, TUR);
     setTimeout(() => {
+      gecis = false;
       if (gi >= TUR) {
         ctx.options.className = 'options-area';
         ctx.finish(3, `${karakter.ad} için ${TUR} kombin hazırladın!`);
